@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { BrainCircuit, ShieldCheck, RefreshCw, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { PredictionResult } from '../types';
-import { Card, Badge } from './UI';
+import { Prediction } from '../types';
+import { Card } from './Card';
+import { Badge } from './Badge';
 
 interface AIGuardrailProps {
-  prediction: PredictionResult | null;
+  prediction: Prediction | null;
   isAnalyzing: boolean;
 }
 
@@ -17,8 +18,8 @@ export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzin
         AI Deployment Guardrail
       </h3>
       {prediction && (
-        <Badge variant={prediction.riskLevel === 'low' ? 'success' : prediction.riskLevel === 'medium' ? 'warning' : 'danger'}>
-          {prediction.riskLevel} Risk
+        <Badge variant={prediction.risk === 'Low' ? 'success' : prediction.risk === 'Medium' ? 'warning' : 'danger'}>
+          {prediction.risk} Risk
         </Badge>
       )}
     </div>
@@ -49,14 +50,14 @@ export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzin
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div className="flex justify-between items-end">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Success Probability</span>
-            <span className="text-2xl font-bold text-white">{prediction?.successProbability}%</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase">Confidence Score</span>
+            <span className="text-2xl font-bold text-white">{prediction?.confidence}%</span>
           </div>
           <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: `${prediction?.successProbability}%` }}
-              className={`h-full ${prediction?.successProbability! > 80 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+              animate={{ width: `${prediction?.confidence}%` }}
+              className={`h-full ${prediction?.confidence! > 80 ? 'bg-emerald-500' : 'bg-amber-500'}`}
             />
           </div>
           <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
@@ -67,17 +68,15 @@ export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzin
           </div>
         </div>
         <div className="space-y-3">
-          <span className="text-[10px] font-bold text-slate-500 uppercase">Risk Factors</span>
-          {prediction?.factors.map((factor, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/30 p-2 rounded-lg border border-slate-800/50">
-              {prediction.riskLevel === 'low' ? (
-                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-              ) : (
-                <AlertTriangle size={14} className="text-amber-500 shrink-0" />
-              )}
-              <span>{factor}</span>
-            </div>
-          ))}
+          <span className="text-[10px] font-bold text-slate-500 uppercase">Impact Analysis</span>
+          <div className="flex items-start gap-2 text-xs text-slate-400 bg-slate-800/30 p-3 rounded-lg border border-slate-800/50">
+            {prediction?.risk === 'Low' ? (
+              <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+            ) : (
+              <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+            )}
+            <span className="leading-relaxed">{prediction?.impact}</span>
+          </div>
         </div>
       </div>
     )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Github, History, RefreshCw } from 'lucide-react';
 import { Commit } from '../types';
-import { Card } from './UI';
+import { Card } from './Card';
 
 interface LatestCommitProps {
   commit: Commit;
@@ -29,12 +29,12 @@ export const LatestCommit: React.FC<LatestCommitProps> = ({ commit, onSimulateCh
           <History size={16} />
         </div>
         <div>
-          <p className="text-xs font-bold text-white">{commit.message}</p>
-          <p className="text-[10px] text-slate-500">shrinivasbhore committed {commit.time}</p>
+          <p className="text-xs font-bold text-white leading-tight">{commit.message}</p>
+          <p className="text-[10px] text-slate-500 mt-1">{commit.author} committed {commit.timestamp}</p>
         </div>
       </div>
       <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-800">
-        <p className="text-[10px] text-slate-500 font-mono truncate">SHA: {commit.hash}</p>
+        <p className="text-[10px] text-slate-500 font-mono truncate">SHA: {commit.id}</p>
       </div>
     </div>
   </Card>
