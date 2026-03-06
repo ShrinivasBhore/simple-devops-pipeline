@@ -135,6 +135,27 @@ const ArchitectureDiagram = () => (
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('intro');
+  const [version, setVersion] = useState('1.0.0');
+  const [pipelineState, setPipelineState] = useState<'idle' | 'pushing' | 'building' | 'deploying' | 'success'>('idle');
+  const [logs, setLogs] = useState<string[]>([]);
+
+  const runSimulation = async () => {
+    setPipelineState('pushing');
+    setLogs(['[SYSTEM] Detected code change in main.js...', '[GIT] git add .', '[GIT] git commit -m "Update dashboard UI"', '[GIT] git push origin main']);
+    
+    await new Promise(r => setTimeout(r, 1500));
+    setPipelineState('building');
+    setLogs(prev => [...prev, '[CI] GitHub Actions triggered: Build Job #42', '[DOCKER] Sending build context to Docker daemon...', '[DOCKER] Step 1/4 : FROM nginx:alpine', '[DOCKER] Step 2/4 : COPY . /usr/share/nginx/html/', '[DOCKER] Step 3/4 : EXPOSE 80', '[DOCKER] Successfully built image my-web-app:latest']);
+    
+    await new Promise(r => setTimeout(r, 1500));
+    setPipelineState('deploying');
+    setLogs(prev => [...prev, '[CD] Deploying container to production server...', '[CD] Health check passing: http://localhost:80', '[CD] Traffic shifted to new version.']);
+    
+    await new Promise(r => setTimeout(r, 1500));
+    setPipelineState('success');
+    setVersion('1.1.0');
+    setLogs(prev => [...prev, '[SYSTEM] Auto-update complete. Version 1.1.0 is now live.']);
+  };
 
   const navItems = [
     { id: 'intro', label: 'Introduction', icon: Info },
@@ -166,7 +187,14 @@ export default function App() {
           <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-slate-500">
             <span>Engineering Exam Guide</span>
             <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-            <span>v1.0.0</span>
+            <motion.span 
+              key={version}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold"
+            >
+              v{version}
+            </motion.span>
           </div>
         </div>
       </header>
@@ -534,10 +562,104 @@ git push -u origin main`}
             </div>
           </Section>
 
-          {/* 11. Expected Output */}
-          <Section id="output" title="11. Expected Output" icon={CheckCircle2}>
-            <div className="space-y-6">
-              <div className="p-6 bg-slate-900 rounded-2xl text-emerald-400 font-mono text-sm">
+          {/* 11. Expected Output & Live Simulator */}
+          <Section id="output" title="11. Expected Output & Live Simulator" icon={CheckCircle2}>
+            <div className="space-y-8">
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Live Pipeline Simulation</h3>
+                    <p className="text-sm text-slate-500">Experience how the "Auto-Update" works after a code change.</p>
+                  </div>
+                  <button 
+                    onClick={runSimulation}
+                    disabled={pipelineState !== 'idle' && pipelineState !== 'success'}
+                    className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${
+                      pipelineState === 'idle' || pipelineState === 'success'
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
+                        : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {pipelineState === 'idle' ? (
+                      <>
+                        <Zap size={18} />
+                        Push Code Change
+                      </>
+                    ) : pipelineState === 'success' ? (
+                      <>
+                        <CheckCircle2 size={18} />
+                        Update Successful
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Pipeline Visualization */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                  {[
+                    { id: 'pushing', label: 'Git Push', icon: Github },
+                    { id: 'building', label: 'Docker Build', icon: Container },
+                    { id: 'deploying', label: 'Deploying', icon: Server },
+                    { id: 'success', label: 'Live', icon: CheckCircle2 },
+                  ].map((step, i) => {
+                    const isActive = pipelineState === step.id;
+                    const isDone = 
+                      (pipelineState === 'building' && i < 1) ||
+                      (pipelineState === 'deploying' && i < 2) ||
+                      (pipelineState === 'success');
+
+                    return (
+                      <div key={step.id} className="relative">
+                        <div className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                          isActive 
+                            ? 'bg-indigo-50 border-indigo-500 scale-105 shadow-md' 
+                            : isDone 
+                              ? 'bg-emerald-50 border-emerald-500' 
+                              : 'bg-white border-slate-100 opacity-50'
+                        }`}>
+                          <step.icon size={20} className={isActive ? 'text-indigo-600' : isDone ? 'text-emerald-600' : 'text-slate-400'} />
+                          <span className={`text-xs font-bold ${isActive ? 'text-indigo-900' : isDone ? 'text-emerald-900' : 'text-slate-500'}`}>
+                            {step.label}
+                          </span>
+                        </div>
+                        {i < 3 && (
+                          <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-0.5 bg-slate-200"></div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Log Collection */}
+                <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs text-slate-300 h-48 overflow-y-auto border border-slate-800">
+                  <div className="flex items-center gap-2 text-slate-500 mb-2 border-b border-slate-800 pb-2">
+                    <Terminal size={14} />
+                    <span>Pipeline Logs (Collected)</span>
+                  </div>
+                  <AnimatePresence mode="popLayout">
+                    {logs.map((log, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`mb-1 ${log.startsWith('[SYSTEM]') ? 'text-indigo-400 font-bold' : log.startsWith('[DOCKER]') ? 'text-blue-400' : log.startsWith('[CD]') ? 'text-emerald-400' : ''}`}
+                      >
+                        {log}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {pipelineState === 'idle' && (
+                    <div className="text-slate-600 italic">Waiting for code push...</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6 bg-slate-900 rounded-2xl text-emerald-400 font-mono text-sm hidden md:block">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle2 size={16} />
                   <span>Run actions/checkout@v3</span>
