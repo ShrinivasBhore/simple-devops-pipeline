@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Terminal, 
-  Container, 
-  Workflow, 
-  Zap, 
-  Database,
-  Plus,
-  RefreshCw,
-  Activity,
-  BarChart3,
-  FolderTree,
-  Server,
-  Github
-} from 'lucide-react';
+import { Activity, BarChart3, FolderTree, Server, Github, Globe, HardDrive as DiskIcon, Zap, Container, Database, Workflow, Terminal, RefreshCw, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { analyzeDeploymentRisk } from './services/predictionService';
 import { View, PipelineStatus, PredictionResult, Commit } from './types';
@@ -24,6 +11,7 @@ import { LatestCommit } from './components/LatestCommit';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { CodeBlock } from './components/CodeBlock';
+import { PerformanceChart } from './components/PerformanceChart';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -41,6 +29,9 @@ export default function App() {
   ]);
   const [cpuUsage, setCpuUsage] = useState(8);
   const [memUsage, setMemUsage] = useState(42);
+  const [netUsage, setNetUsage] = useState(12);
+  const [diskUsage, setDiskUsage] = useState(28);
+  const [performanceData, setPerformanceData] = useState<{time: string, cpu: number, memory: number}[]>([]);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [latestCommit, setLatestCommit] = useState<Commit>({
@@ -52,8 +43,25 @@ export default function App() {
   // Simulate monitoring updates
   useEffect(() => {
     const interval = setInterval(() => {
-      setCpuUsage(Math.floor(Math.random() * 15) + 5);
-      setMemUsage(Math.floor(Math.random() * 5) + 40);
+      const newCpu = Math.floor(Math.random() * 15) + 5;
+      const newMem = Math.floor(Math.random() * 5) + 40;
+      const newNet = Math.floor(Math.random() * 20) + 10;
+      const newDisk = Math.floor(Math.random() * 2) + 28;
+
+      setCpuUsage(newCpu);
+      setMemUsage(newMem);
+      setNetUsage(newNet);
+      setDiskUsage(newDisk);
+
+      setPerformanceData(prev => {
+        const newData = [...prev, { 
+          time: new Date().toLocaleTimeString(), 
+          cpu: newCpu, 
+          memory: newMem 
+        }];
+        if (newData.length > 20) return newData.slice(1);
+        return newData;
+      });
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -217,9 +225,19 @@ export default function App() {
                           <button className="px-3 py-1 text-[10px] font-bold text-slate-500">History</button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <MonitoringWidget label="CPU Usage" value={cpuUsage} icon="cpu" color="text-violet-500" />
-                        <MonitoringWidget label="Memory Usage" value={memUsage} icon="memory" color="text-emerald-500" />
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <MonitoringWidget label="CPU Usage" value={cpuUsage} icon="cpu" color="text-violet-500" />
+                          <MonitoringWidget label="Memory Usage" value={memUsage} icon="memory" color="text-emerald-500" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <MonitoringWidget label="Network Load" value={netUsage} icon="network" color="text-sky-500" />
+                          <MonitoringWidget label="Disk I/O" value={diskUsage} icon="disk" color="text-amber-500" />
+                        </div>
+                        <div className="pt-4 border-t border-slate-800/50">
+                          <p className="text-[10px] font-bold text-slate-500 uppercase mb-4">Performance History (20m)</p>
+                          <PerformanceChart data={performanceData} />
+                        </div>
                       </div>
                     </Card>
 
