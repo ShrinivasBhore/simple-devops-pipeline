@@ -1,5 +1,5 @@
 {
-  "name": "DevOps Portfolio Guide",
-  "description": "A professional guide for building a DevOps CI/CD pipeline project suitable for engineering exams and GitHub portfolios.",
+  "name": "Professional DevOps Dashboard v2.0",
+  "description": "A professional-grade DevOps dashboard project featuring a full-stack architecture with Node.js, MongoDB, Docker, and GitHub Actions.",
   "requestFramePermissions": []
 }
