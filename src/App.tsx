@@ -11,7 +11,9 @@ import {
   Github,
   Server,
   BarChart3,
-  FolderTree
+  FolderTree,
+  Settings,
+  Box
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from './components/Card';
@@ -25,6 +27,7 @@ import { Header } from './components/Header';
 import { CodeBlock } from './components/CodeBlock';
 import { PerformanceChart } from './components/PerformanceChart';
 import { InfrastructureView } from './components/InfrastructureView';
+import { ContainersView } from './components/ContainersView';
 import { View, Commit, Prediction } from './types';
 
 export default function App() {
@@ -75,29 +78,38 @@ export default function App() {
     
     setPipelineStatus('running');
     addLog('🚀 Starting manual deployment pipeline...');
-    addLog('📦 Pulling latest changes from main branch...');
+    addLog('🔍 Validating infrastructure state...');
     
     setTimeout(() => {
-      addLog('🔨 Building Docker images...');
+      addLog('📦 Pulling latest changes from main branch...');
       setTimeout(() => {
-        addLog('🧪 Running automated tests...');
+        addLog('🔨 Building Docker images (api-gateway, auth-service)...');
         setTimeout(() => {
-          addLog('✅ Tests passed. Pushing to registry...');
+          addLog('🧪 Running automated tests & security scans...');
           setTimeout(() => {
-            addLog('🚢 Deploying to production cluster...');
-            setPipelineStatus('success');
-            setDeploymentCount(prev => prev + 1);
-            addLog('✨ Deployment successful! System stable.');
-            
-            const vParts = version.split('.');
-            const newV = `${vParts[0]}.${vParts[1]}.${parseInt(vParts[2]) + 1}`;
-            setVersion(newV);
-            
-            setTimeout(() => setPipelineStatus('idle'), 3000);
+            addLog('✅ Tests passed. Pushing images to private registry...');
+            setTimeout(() => {
+              addLog('🚢 Orchestrating container rollout (Rolling Update)...');
+              addLog('🔄 Stopping old instances of auth-service...');
+              addLog('✨ Starting new instances of auth-service v' + version + '...');
+              
+              setTimeout(() => {
+                addLog('🌐 Updating load balancer configurations...');
+                setPipelineStatus('success');
+                setDeploymentCount(prev => prev + 1);
+                addLog('✨ Deployment successful! Service orchestration complete.');
+                
+                const vParts = version.split('.');
+                const newV = `${vParts[0]}.${vParts[1]}.${parseInt(vParts[2]) + 1}`;
+                setVersion(newV);
+                
+                setTimeout(() => setPipelineStatus('idle'), 3000);
+              }, 1500);
+            }, 1000);
           }, 1500);
-        }, 1000);
-      }, 2000);
-    }, 1000);
+        }, 1500);
+      }, 1000);
+    }, 800);
   };
 
   const simulateChange = () => {
@@ -279,6 +291,28 @@ export default function App() {
                     </div>
                   </div>
                 </Card>
+
+                <Card className="p-6">
+                  <h3 className="font-bold mb-4 flex items-center gap-2 text-white">
+                    <Workflow size={18} className="text-slate-400" />
+                    Recent Deployments
+                  </h3>
+                  <div className="space-y-4">
+                    {[
+                      { env: 'Production', time: '2h ago', status: 'success' },
+                      { env: 'Staging', time: '5h ago', status: 'success' },
+                      { env: 'Production', time: '1d ago', status: 'failed' }
+                    ].map((dep, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50 border border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-1.5 h-1.5 rounded-full ${dep.status === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          <span className="text-xs font-medium text-slate-300">{dep.env}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500">{dep.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
               </div>
             </div>
           </motion.div>
@@ -292,6 +326,57 @@ export default function App() {
             diskUsage={diskUsage}
             performanceData={performanceData}
           />
+        );
+      case 'containers':
+        return (
+          <motion.div
+            key="containers"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <ContainersView />
+          </motion.div>
+        );
+      case 'logs':
+        return (
+          <motion.div 
+            key="logs"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            <h1 className="text-3xl font-bold text-white tracking-tight">System Logs</h1>
+            <Card className="p-6">
+              <LogTerminal logs={logs} />
+            </Card>
+          </motion.div>
+        );
+      case 'database':
+        return (
+          <motion.div 
+            key="database"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center h-[60vh] text-slate-500 flex-col gap-4"
+          >
+            <Database size={48} className="text-slate-700" />
+            <p className="text-lg font-medium">Database Management Module</p>
+            <p className="text-sm">This module is currently being optimized for high-throughput orchestration.</p>
+          </motion.div>
+        );
+      case 'settings':
+        return (
+          <motion.div 
+            key="settings"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center h-[60vh] text-slate-500 flex-col gap-4"
+          >
+            <Settings size={48} className="text-slate-700" />
+            <p className="text-lg font-medium">System Settings</p>
+            <p className="text-sm">Global configuration and access control management.</p>
+          </motion.div>
         );
       case 'guide':
         return (
@@ -377,37 +462,31 @@ app.listen(3000, () => console.log('Backend API running on port 3000'));`}
             <section>
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400">
-                  <Container size={24} />
+                  <Box size={24} />
                 </div>
-                <h2 className="text-2xl font-bold text-white">3. Containerization (v2.0)</h2>
+                <h2 className="text-2xl font-bold text-white">3. Container Orchestration (v2.5)</h2>
               </div>
               <Card className="p-8">
-                <p className="text-slate-500 mb-6">We use Docker Compose to orchestrate the Frontend, Backend, and MongoDB database.</p>
+                <p className="text-slate-500 mb-6">We use Docker Compose and custom orchestration logic to manage container lifecycles and service health.</p>
                 <CodeBlock 
-                  filename="devops/docker-compose.yml"
-                  language="yaml"
-                  code={`version: '3.8'
-services:
-  frontend:
-    build: ./frontend
-    ports: ["80:80"]
-    depends_on: ["backend"]
+                  filename="devops/orchestration.js"
+                  language="javascript"
+                  code={`// Automated service health check & recovery
+async function checkServiceHealth(serviceName) {
+  const container = await docker.getContainer(serviceName);
+  const stats = await container.stats({ stream: false });
   
-  backend:
-    build: ./backend
-    ports: ["3000:3000"]
-    environment:
-      - MONGO_URI=mongodb://database:27017/devops_db
-    depends_on: ["database"]
+  if (stats.cpu_stats.cpu_usage.total_usage > THRESHOLD) {
+    console.log(\`⚠️ High CPU detected on \${serviceName}. Scaling up...\`);
+    await scaleService(serviceName, 2);
+  }
+}
 
-  database:
-    image: mongo:latest
-    ports: ["27017:27017"]
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:`}
+// Rolling update orchestration
+async function deployRollingUpdate(serviceName, newImage) {
+  console.log(\`🚀 Starting rolling update for \${serviceName}...\`);
+  // Implementation of zero-downtime deployment
+}`}
                 />
               </Card>
             </section>

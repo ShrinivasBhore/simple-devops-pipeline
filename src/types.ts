@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure';
+export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers';
 export type PipelineStatus = 'idle' | 'running' | 'success' | 'failed';
 
 export interface Commit {
@@ -14,4 +14,15 @@ export interface Prediction {
   confidence: number;
   impact: string;
   recommendation: string;
+}
+
+export interface Container {
+  id: string;
+  name: string;
+  image: string;
+  status: 'running' | 'stopped' | 'restarting' | 'error';
+  cpu: string;
+  memory: string;
+  uptime: string;
+  ports: string[];
 }
