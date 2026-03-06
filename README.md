@@ -1,20 +1,24 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# DevOps CI/CD Web Application v2.0.2
 
-# Run and deploy your AI Studio app
+Professional DevOps project demonstrating automated pipelines, containerization, and full-stack architecture.
 
-This contains everything you need to run your app locally.
+## 🚀 Features
+- **Automated CI/CD**: GitHub Actions workflow for build, test, and deploy.
+- **Containerization**: Docker & Docker Compose for multi-service orchestration.
+- **Full-Stack**: Node.js Backend, MongoDB Database, and Modern Frontend.
+- **Monitoring**: Real-time dashboard for system health.
 
-View your app in AI Studio: https://ai.studio/apps/fb03bb9e-4adb-47cb-b3e5-93341ce74ffe
+## 📂 Project Structure
+- `frontend/`: UI components and static assets.
+- `backend/`: Express.js server and API routes.
+- `database/`: MongoDB connection and schemas.
+- `devops/`: Dockerfile, Docker Compose, and CI/CD workflows.
+- `docs/`: Technical documentation and architecture.
 
-## Run Locally
+## 🛠️ Setup
+1. Clone the repository.
+2. Run `docker-compose up --build` to start the entire stack.
+3. Access the dashboard at `http://localhost`.
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 📝 License
+MIT
