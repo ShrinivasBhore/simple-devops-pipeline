@@ -1,13 +1,14 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Workflow, Home, FileCode, Terminal, Database, Settings, X, Menu, LucideIcon, Server, Box } from 'lucide-react';
-import { View } from '../types';
+import { Workflow, Home, FileCode, Terminal, Database, Settings, X, Menu, LucideIcon, Server, Box, Shield } from 'lucide-react';
+import { View, Role } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   currentView: View;
   setView: (view: View) => void;
+  userRole: Role;
 }
 
 const navItems: { id: View; label: string; icon: LucideIcon }[] = [
@@ -20,7 +21,7 @@ const navItems: { id: View; label: string; icon: LucideIcon }[] = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView, setView }) => (
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView, setView, userRole }) => (
   <aside 
     className={`${
       isOpen ? 'w-64' : 'w-20'
@@ -31,13 +32,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView
         <Workflow size={24} />
       </div>
       {isOpen && (
-        <motion.span 
+        <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="font-bold text-lg tracking-tight whitespace-nowrap text-white"
+          className="flex flex-col"
         >
-          DevOps v2.0
-        </motion.span>
+          <span className="font-bold text-sm tracking-tight whitespace-nowrap text-white">
+            DevOps v2.5
+          </span>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Shield size={10} className={userRole === 'admin' ? 'text-rose-400' : userRole === 'developer' ? 'text-violet-400' : 'text-slate-500'} />
+            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+              {userRole}
+            </span>
+          </div>
+        </motion.div>
       )}
     </div>
 

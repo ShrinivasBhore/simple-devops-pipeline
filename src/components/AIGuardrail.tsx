@@ -1,27 +1,35 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { BrainCircuit, ShieldCheck, RefreshCw, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { Prediction } from '../types';
+import { BrainCircuit, ShieldCheck, RefreshCw, Info, CheckCircle2, AlertTriangle, Lock } from 'lucide-react';
+import { Prediction, Role } from '../types';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
 interface AIGuardrailProps {
   prediction: Prediction | null;
   isAnalyzing: boolean;
+  userRole: Role;
 }
 
-export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzing }) => (
+export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzing, userRole }) => (
   <Card className="p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="font-bold text-lg flex items-center gap-2 text-white">
         <BrainCircuit size={20} className="text-violet-400" />
         AI Deployment Guardrail
       </h3>
-      {prediction && (
-        <Badge variant={prediction.risk === 'Low' ? 'success' : prediction.risk === 'Medium' ? 'warning' : 'danger'}>
-          {prediction.risk} Risk
-        </Badge>
-      )}
+      <div className="flex items-center gap-2">
+        {userRole === 'viewer' && (
+          <Badge variant="default" className="bg-slate-800 text-slate-500 border-slate-700 flex items-center gap-1">
+            <Lock size={10} /> Read Only
+          </Badge>
+        )}
+        {prediction && (
+          <Badge variant={prediction.risk === 'Low' ? 'success' : prediction.risk === 'Medium' ? 'warning' : 'danger'}>
+            {prediction.risk} Risk
+          </Badge>
+        )}
+      </div>
     </div>
 
     {!prediction && !isAnalyzing ? (

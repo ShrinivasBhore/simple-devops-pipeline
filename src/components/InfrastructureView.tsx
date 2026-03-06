@@ -7,12 +7,15 @@ import { MonitoringWidget } from './MonitoringWidget';
 import { PerformanceChart } from './PerformanceChart';
 import { NodeList } from './NodeList';
 
+import { View, Role } from '../types';
+
 interface InfrastructureViewProps {
   cpuUsage: number;
   memUsage: number;
   netUsage: number;
   diskUsage: number;
   performanceData: {time: string, cpu: number, memory: number}[];
+  userRole: Role;
 }
 
 export const InfrastructureView: React.FC<InfrastructureViewProps> = ({ 
@@ -20,8 +23,10 @@ export const InfrastructureView: React.FC<InfrastructureViewProps> = ({
   memUsage, 
   netUsage, 
   diskUsage, 
-  performanceData 
+  performanceData,
+  userRole
 }) => {
+  const isReadOnly = userRole === 'viewer';
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -142,7 +147,14 @@ export const InfrastructureView: React.FC<InfrastructureViewProps> = ({
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
               AI-powered security monitoring is active. No unauthorized access attempts detected in the last 24 hours.
             </p>
-            <button className="w-full py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors">
+            <button 
+              disabled={isReadOnly}
+              className={`w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                isReadOnly 
+                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 
+                  : 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg'
+              }`}
+            >
               View Security Logs
             </button>
           </Card>

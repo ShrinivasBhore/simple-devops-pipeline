@@ -16,6 +16,15 @@ export interface Prediction {
   recommendation: string;
 }
 
+export type Role = 'admin' | 'developer' | 'viewer';
+
+export interface User {
+  name: string;
+  email: string;
+  role: Role;
+  avatar?: string;
+}
+
 export interface Container {
   id: string;
   name: string;

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Github, History, RefreshCw } from 'lucide-react';
-import { Commit } from '../types';
+import { Commit, Role } from '../types';
 import { Card } from './Card';
 
 interface LatestCommitProps {
   commit: Commit;
   onSimulateChange: () => void;
+  userRole: Role;
 }
 
-export const LatestCommit: React.FC<LatestCommitProps> = ({ commit, onSimulateChange }) => (
+export const LatestCommit: React.FC<LatestCommitProps> = ({ commit, onSimulateChange, userRole }) => (
   <Card className="p-6">
     <div className="flex items-center justify-between mb-4">
       <h3 className="font-bold text-lg flex items-center gap-2 text-white">
@@ -17,7 +18,12 @@ export const LatestCommit: React.FC<LatestCommitProps> = ({ commit, onSimulateCh
       </h3>
       <button 
         onClick={onSimulateChange}
-        className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-700 transition-colors flex items-center gap-1"
+        disabled={userRole === 'viewer'}
+        className={`text-[10px] px-2 py-1 rounded border transition-colors flex items-center gap-1 ${
+          userRole === 'viewer' 
+            ? 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed' 
+            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+        }`}
       >
         <RefreshCw size={10} />
         Push Change

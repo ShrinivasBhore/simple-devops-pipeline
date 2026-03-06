@@ -16,7 +16,7 @@ import {
   ExternalLink,
   Trash2
 } from 'lucide-react';
-import { Container } from '../types';
+import { Container, Role } from '../types';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
@@ -83,9 +83,15 @@ const initialContainers: Container[] = [
   }
 ];
 
-export const ContainersView: React.FC = () => {
+interface ContainersViewProps {
+  userRole: Role;
+}
+
+export const ContainersView: React.FC<ContainersViewProps> = ({ userRole }) => {
   const [containers, setContainers] = useState<Container[]>(initialContainers);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const isReadOnly = userRole === 'viewer';
 
   const filteredContainers = containers.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -132,7 +138,14 @@ export const ContainersView: React.FC = () => {
           <p className="text-slate-500 mt-1">Orchestrate and monitor your application services.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-violet-500/20">
+          <button 
+            disabled={isReadOnly}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg ${
+              isReadOnly 
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 
+                : 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-500/20'
+            }`}
+          >
             <Plus size={16} />
             Deploy Service
           </button>
@@ -256,20 +269,26 @@ export const ContainersView: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => toggleStatus(container.id)}
+                      onClick={() => !isReadOnly && toggleStatus(container.id)}
+                      disabled={isReadOnly}
                       className={`p-2 rounded-lg transition-colors ${
+                        isReadOnly ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed' :
                         container.status === 'running' 
                         ? 'bg-slate-800 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400' 
                         : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
                       }`}
-                      title={container.status === 'running' ? 'Stop' : 'Start'}
+                      title={isReadOnly ? 'Permission Denied' : container.status === 'running' ? 'Stop' : 'Start'}
                     >
                       {container.status === 'running' ? <Square size={16} /> : <Play size={16} />}
                     </button>
                     <button 
-                      onClick={() => restartContainer(container.id)}
-                      className="p-2 bg-slate-800 text-slate-400 hover:bg-violet-500/10 hover:text-violet-400 rounded-lg transition-colors"
-                      title="Restart"
+                      onClick={() => !isReadOnly && restartContainer(container.id)}
+                      disabled={isReadOnly}
+                      className={`p-2 rounded-lg transition-colors ${
+                        isReadOnly ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed' :
+                        'bg-slate-800 text-slate-400 hover:bg-violet-500/10 hover:text-violet-400'
+                      }`}
+                      title={isReadOnly ? 'Permission Denied' : "Restart"}
                     >
                       <RotateCcw size={16} className={container.status === 'restarting' ? 'animate-spin' : ''} />
                     </button>
@@ -277,7 +296,10 @@ export const ContainersView: React.FC = () => {
                       <Terminal size={16} />
                     </button>
                     <div className="w-px h-4 bg-slate-800 mx-1" />
-                    <button className="p-2 text-slate-500 hover:text-rose-400 transition-colors">
+                    <button 
+                      disabled={isReadOnly}
+                      className={`p-2 transition-colors ${isReadOnly ? 'text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-rose-400'}`}
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>

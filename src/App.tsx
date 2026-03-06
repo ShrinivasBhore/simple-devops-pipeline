@@ -28,10 +28,15 @@ import { CodeBlock } from './components/CodeBlock';
 import { PerformanceChart } from './components/PerformanceChart';
 import { InfrastructureView } from './components/InfrastructureView';
 import { ContainersView } from './components/ContainersView';
-import { View, Commit, Prediction } from './types';
+import { View, Commit, Prediction, User, Role } from './types';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
+  const [user, setUser] = useState<User>({
+    name: 'Shrinivas Bhore',
+    email: 'shrinivasbhore6@gmail.com',
+    role: 'admin'
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [deploymentCount, setDeploymentCount] = useState(128);
   const [containerStatus, setContainerStatus] = useState<'running' | 'stopped'>('running');
@@ -76,6 +81,11 @@ export default function App() {
   const triggerPipeline = () => {
     if (pipelineStatus === 'running') return;
     
+    if (user.role === 'viewer') {
+      addLog('❌ Permission Denied: Viewers cannot trigger deployments.');
+      return;
+    }
+    
     setPipelineStatus('running');
     addLog('🚀 Starting manual deployment pipeline...');
     addLog('🔍 Validating infrastructure state...');
@@ -113,6 +123,10 @@ export default function App() {
   };
 
   const simulateChange = () => {
+    if (user.role === 'viewer') {
+      addLog('❌ Permission Denied: Viewers cannot simulate changes.');
+      return;
+    }
     setIsAnalyzing(true);
     addLog('🔍 Detecting code changes...');
     
@@ -224,7 +238,7 @@ export default function App() {
                   </div>
                 </Card>
 
-                <AIGuardrail prediction={prediction} isAnalyzing={isAnalyzing} />
+                <AIGuardrail prediction={prediction} isAnalyzing={isAnalyzing} userRole={user.role} />
 
                 <Card className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -253,10 +267,12 @@ export default function App() {
                   <p className="text-violet-100 text-xs mb-6 leading-relaxed">Trigger a manual CI/CD pipeline build and deployment.</p>
                   <button 
                     onClick={() => triggerPipeline()}
-                    disabled={pipelineStatus === 'running'}
+                    disabled={pipelineStatus === 'running' || user.role === 'viewer'}
                     className={`w-full py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 ${
                       pipelineStatus === 'running' 
                         ? 'bg-violet-500/50 cursor-not-allowed' 
+                        : user.role === 'viewer'
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                         : 'bg-white text-violet-600 hover:bg-violet-50 shadow-lg'
                     }`}
                   >
@@ -269,7 +285,7 @@ export default function App() {
                   </button>
                 </Card>
 
-                <LatestCommit commit={latestCommit} onSimulateChange={simulateChange} />
+                <LatestCommit commit={latestCommit} onSimulateChange={simulateChange} userRole={user.role} />
 
                 <Card className="p-6">
                   <h3 className="font-bold mb-4 flex items-center gap-2 text-white">
@@ -325,6 +341,7 @@ export default function App() {
             netUsage={netUsage}
             diskUsage={diskUsage}
             performanceData={performanceData}
+            userRole={user.role}
           />
         );
       case 'containers':
@@ -335,7 +352,7 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <ContainersView />
+            <ContainersView userRole={user.role} />
           </motion.div>
         );
       case 'logs':
@@ -571,10 +588,16 @@ jobs:
         setIsOpen={setIsSidebarOpen} 
         currentView={view} 
         setView={setView} 
+        userRole={user.role}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header view={view} version={version} />
+        <Header 
+          view={view} 
+          version={version} 
+          user={user} 
+          onRoleChange={(role) => setUser({ ...user, role })}
+        />
 
         <main className="flex-1 overflow-y-auto p-8 bg-[#0a0c10]">
           <AnimatePresence mode="wait">
