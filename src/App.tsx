@@ -122,6 +122,11 @@ export default function App() {
   const [memUsage, setMemUsage] = useState(42);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [latestCommit, setLatestCommit] = useState({
+    message: "feat: redesign project architecture",
+    hash: "7d8e9f0a1b2c3d4e5f6g7h8i9j0k",
+    time: "2 hours ago"
+  });
 
   // Simulate monitoring updates
   useEffect(() => {
@@ -132,17 +137,40 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const triggerPipeline = async () => {
+  const simulateChange = () => {
+    const messages = [
+      "fix: resolve memory leak in worker thread",
+      "feat: add oauth2 authentication provider",
+      "refactor: optimize database query performance",
+      "docs: update deployment instructions",
+      "chore: bump dependencies"
+    ];
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    const randomHash = Math.random().toString(16).substring(2, 15) + Math.random().toString(16).substring(2, 15);
+    
+    setLatestCommit({
+      message: randomMsg,
+      hash: randomHash,
+      time: "Just now"
+    });
+
+    // Automatically trigger pipeline after a "change"
+    triggerPipeline(randomMsg);
+  };
+
+  const triggerPipeline = async (commitMsg?: string) => {
     if (pipelineStatus === 'running') return;
+    
+    const currentCommit = commitMsg || latestCommit.message;
     
     // Step 1: AI Risk Analysis
     setIsAnalyzing(true);
-    setLogs(prev => [...prev, `[${new Date().toISOString().replace('T', ' ').split('.')[0]}] AI: Starting pre-deployment risk analysis...`]);
+    setLogs(prev => [...prev, `[${new Date().toISOString().replace('T', ' ').split('.')[0]}] AI: Starting pre-deployment risk analysis for "${currentCommit}"...`]);
     
     const result = await analyzeDeploymentRisk({
-      commitMessage: "feat: redesign project architecture",
-      changedFiles: 12,
-      testCoverage: 94,
+      commitMessage: currentCommit,
+      changedFiles: Math.floor(Math.random() * 20) + 1,
+      testCoverage: Math.floor(Math.random() * 10) + 90,
       lastDeploymentStatus: "success"
     });
     
@@ -519,22 +547,31 @@ export default function App() {
                     </Card>
 
                     <Card className="p-6">
-                      <h3 className="font-bold mb-4 flex items-center gap-2 text-white">
-                        <Github size={18} className="text-slate-400" />
-                        Latest Commit
-                      </h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-lg flex items-center gap-2 text-white">
+                          <Github size={18} className="text-slate-400" />
+                          Latest Commit
+                        </h3>
+                        <button 
+                          onClick={simulateChange}
+                          className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-700 transition-colors flex items-center gap-1"
+                        >
+                          <RefreshCw size={10} />
+                          Push Change
+                        </button>
+                      </div>
                       <div className="space-y-4">
                         <div className="flex gap-3">
                           <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
                             <History size={16} />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-white">feat: redesign project architecture</p>
-                            <p className="text-[10px] text-slate-500">shrinivasbhore committed 2 hours ago</p>
+                            <p className="text-xs font-bold text-white">{latestCommit.message}</p>
+                            <p className="text-[10px] text-slate-500">shrinivasbhore committed {latestCommit.time}</p>
                           </div>
                         </div>
                         <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-800">
-                          <p className="text-[10px] text-slate-500 font-mono">SHA: 7d8e9f0a1b2c3d4e5f6g7h8i9j0k</p>
+                          <p className="text-[10px] text-slate-500 font-mono truncate">SHA: {latestCommit.hash}</p>
                         </div>
                       </div>
                     </Card>
