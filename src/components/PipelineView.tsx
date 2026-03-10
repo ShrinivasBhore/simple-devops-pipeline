@@ -1,6 +1,21 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Workflow, CheckCircle2, Circle, Clock, Shield, Zap, Box, Globe, Terminal, Activity, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Workflow, 
+  CheckCircle2, 
+  Circle, 
+  Clock, 
+  Shield, 
+  Zap, 
+  Box, 
+  Globe, 
+  Terminal, 
+  Activity, 
+  RefreshCw,
+  AlertTriangle,
+  RotateCcw,
+  Play
+} from 'lucide-react';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
@@ -13,7 +28,7 @@ interface PipelineStep {
   duration?: string;
 }
 
-const steps: PipelineStep[] = [
+const initialSteps: PipelineStep[] = [
   { id: 1, name: 'Static Analysis', description: 'Linting and code quality checks', icon: Terminal, status: 'success', duration: '12s' },
   { id: 2, name: 'Security Scan', description: 'SAST and dependency vulnerability check', icon: Shield, status: 'success', duration: '45s' },
   { id: 3, name: 'Automated Testing', description: 'Unit, integration, and E2E tests', icon: Activity, status: 'success', duration: '2m 15s' },
@@ -25,6 +40,63 @@ const steps: PipelineStep[] = [
 ];
 
 export const PipelineView: React.FC = () => {
+  const [steps, setSteps] = useState<PipelineStep[]>(initialSteps);
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [isRollingBack, setIsRollingBack] = useState(false);
+  const [pipelineStatus, setPipelineStatus] = useState<'idle' | 'running' | 'failed' | 'success' | 'rollback'>('idle');
+
+  const runPipeline = async () => {
+    setIsDeploying(true);
+    setPipelineStatus('running');
+    
+    // Reset steps to pending starting from step 7
+    setSteps(prev => prev.map(s => s.id >= 7 ? { ...s, status: 'pending' } : s));
+
+    const runStep = async (stepId: number, duration: number, shouldFail: boolean = false) => {
+      setSteps(prev => prev.map(s => s.id === stepId ? { ...s, status: 'running' } : s));
+      await new Promise(resolve => setTimeout(resolve, duration));
+      
+      if (shouldFail) {
+        setSteps(prev => prev.map(s => s.id === stepId ? { ...s, status: 'failed' } : s));
+        return false;
+      }
+      
+      setSteps(prev => prev.map(s => s.id === stepId ? { ...s, status: 'success', duration: `${(duration/1000).toFixed(1)}s` } : s));
+      return true;
+    };
+
+    // Step 7: Full Deployment
+    const step7Success = await runStep(7, 2000);
+    if (!step7Success) return;
+
+    // Step 8: Health Verification (Simulate Failure)
+    const step8Success = await runStep(8, 3000, true);
+    
+    if (!step8Success) {
+      setPipelineStatus('failed');
+      // Trigger automatic rollback after a short delay
+      setTimeout(() => triggerRollback(), 2000);
+    } else {
+      setPipelineStatus('success');
+      setIsDeploying(false);
+    }
+  };
+
+  const triggerRollback = async () => {
+    setIsRollingBack(true);
+    setPipelineStatus('rollback');
+    
+    // Simulate rollback process
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Reset steps to last stable state (all success except maybe the one that failed is now reverted)
+    setSteps(prev => prev.map(s => ({ ...s, status: 'success' })));
+    
+    setIsRollingBack(false);
+    setIsDeploying(false);
+    setPipelineStatus('idle');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -37,12 +109,64 @@ export const PipelineView: React.FC = () => {
           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Automated Workflow Configuration v4.0.2</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="success" className="px-4 py-2">System Optimal</Badge>
+          <AnimatePresence mode="wait">
+            {pipelineStatus === 'failed' ? (
+              <motion.div
+                key="failed"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <Badge variant="danger" className="px-4 py-2 flex items-center gap-2">
+                  <AlertTriangle size={14} /> Deployment Failed
+                </Badge>
+              </motion.div>
+            ) : pipelineStatus === 'rollback' ? (
+              <motion.div
+                key="rollback"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <Badge variant="warning" className="px-4 py-2 flex items-center gap-2">
+                  <RotateCcw size={14} className="animate-spin" /> Auto-Rollback Active
+                </Badge>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="optimal"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <Badge variant="success" className="px-4 py-2">System Optimal</Badge>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
           <div className="h-10 w-px bg-glass-border hidden md:block" />
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-black text-neon-blue uppercase tracking-widest">Last Successful Run</span>
-            <span className="text-xs font-bold text-white">12 minutes ago</span>
-          </div>
+          
+          <button 
+            onClick={runPipeline}
+            disabled={isDeploying}
+            className={`flex items-center gap-2 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+              isDeploying 
+                ? 'bg-glass text-slate-500 border border-glass-border cursor-not-allowed' 
+                : 'bg-neon-blue text-deep-space hover:shadow-[0_0_20px_rgba(0,242,255,0.4)] active:scale-95'
+            }`}
+          >
+            {isDeploying ? (
+              <>
+                <RefreshCw size={14} className="animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Play size={14} fill="currentColor" />
+                Trigger Smart Deployment
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -54,7 +178,7 @@ export const PipelineView: React.FC = () => {
                 <Workflow size={18} className="text-neon-blue" />
                 Workflow Execution Steps
               </h3>
-              <span className="text-[10px] font-mono text-slate-500">8 STEPS CONFIGURED</span>
+              <span className="text-[10px] font-mono text-slate-500">{steps.length} STEPS CONFIGURED</span>
             </div>
             <div className="p-6 space-y-4">
               {steps.map((step, index) => (
@@ -66,12 +190,16 @@ export const PipelineView: React.FC = () => {
                     step.status === 'success' 
                       ? 'bg-neon-blue/5 border-neon-blue/20' 
                       : step.status === 'running'
-                      ? 'bg-neon-purple/10 border-neon-purple/30 animate-pulse'
+                      ? 'bg-neon-purple/10 border-neon-purple/30 animate-pulse shadow-[0_0_15px_rgba(188,19,254,0.1)]'
+                      : step.status === 'failed'
+                      ? 'bg-rose-500/10 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
                       : 'bg-glass border-glass-border'
                   }`}>
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner ${
                       step.status === 'success' 
                         ? 'bg-neon-blue/20 text-neon-blue' 
+                        : step.status === 'failed'
+                        ? 'bg-rose-500/20 text-rose-400'
                         : 'bg-deep-space text-slate-600'
                     }`}>
                       <step.icon size={20} />
@@ -79,7 +207,9 @@ export const PipelineView: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className={`text-xs font-black uppercase tracking-widest ${
-                          step.status === 'success' ? 'text-white' : 'text-slate-500'
+                          step.status === 'success' ? 'text-white' : 
+                          step.status === 'failed' ? 'text-rose-400' :
+                          'text-slate-500'
                         }`}>
                           {step.name}
                         </h4>
@@ -97,6 +227,8 @@ export const PipelineView: React.FC = () => {
                         <CheckCircle2 size={18} className="text-neon-green" />
                       ) : step.status === 'running' ? (
                         <RefreshCw size={18} className="text-neon-purple animate-spin" />
+                      ) : step.status === 'failed' ? (
+                        <AlertTriangle size={18} className="text-rose-400" />
                       ) : (
                         <Circle size={18} className="text-slate-800" />
                       )}
@@ -112,31 +244,47 @@ export const PipelineView: React.FC = () => {
           <Card className="p-6 border-neon-purple/20">
             <h3 className="font-black text-sm text-white uppercase tracking-widest mb-6 flex items-center gap-2">
               <Shield size={18} className="text-neon-purple" />
-              Pipeline Security
+              Smart Rollback Engine
             </h3>
             <div className="space-y-4">
               <div className="p-4 bg-glass rounded-2xl border border-glass-border">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">SAST Enforcement</p>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Failure Detection</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">Strict Mode</span>
+                  <span className="text-xs font-bold text-white">Neural Health Check</span>
                   <Badge variant="success">Active</Badge>
                 </div>
               </div>
               <div className="p-4 bg-glass rounded-2xl border border-glass-border">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Artifact Signing</p>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Rollback Strategy</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">KMS Integration</span>
-                  <Badge variant="success">Verified</Badge>
+                  <span className="text-xs font-bold text-white">Instant Revert</span>
+                  <Badge variant="success">Configured</Badge>
                 </div>
               </div>
               <div className="p-4 bg-glass rounded-2xl border border-glass-border">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Deployment Gate</p>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Stability Threshold</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">AI Approval</span>
-                  <Badge variant="success">Enabled</Badge>
+                  <span className="text-xs font-bold text-white">99.9% Uptime</span>
+                  <Badge variant="success">Locked</Badge>
                 </div>
               </div>
             </div>
+            
+            {isRollingBack && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl"
+              >
+                <div className="flex items-center gap-3 text-rose-400 mb-2">
+                  <RotateCcw size={16} className="animate-spin" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Rolling back to v4.0.1</span>
+                </div>
+                <p className="text-[9px] text-slate-500 font-bold uppercase leading-relaxed">
+                  Deployment failure detected in Health Verification. Reverting traffic to the last stable production cluster.
+                </p>
+              </motion.div>
+            )}
           </Card>
 
           <Card className="p-6 bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 border-none neon-glow-blue">
