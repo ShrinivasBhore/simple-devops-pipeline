@@ -30,6 +30,7 @@ import { InfrastructureView } from './components/InfrastructureView';
 import { ContainersView } from './components/ContainersView';
 import { PipelineView } from './components/PipelineView';
 import { LogsView } from './components/LogsView';
+import { DatabaseView } from './components/DatabaseView';
 import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment } from './types';
 
 export default function App() {
@@ -407,13 +408,15 @@ export default function App() {
         return (
           <motion.div 
             key="database"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center h-[60vh] text-slate-500 flex-col gap-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
           >
-            <Database size={48} className="text-slate-700" />
-            <p className="text-lg font-medium">Database Management Module</p>
-            <p className="text-sm">This module is currently being optimized for high-throughput orchestration.</p>
+            <DatabaseView 
+              userRole={user.role} 
+              activeEnvironment={environment}
+              onLog={addLog} 
+            />
           </motion.div>
         );
       case 'settings':

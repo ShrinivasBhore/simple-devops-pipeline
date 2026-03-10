@@ -49,3 +49,12 @@ export interface Container {
   ports: string[];
   environment: Environment;
 }
+
+export interface Backup {
+  id: string;
+  timestamp: string;
+  size: string;
+  status: 'completed' | 'failed' | 'in-progress';
+  type: 'automated' | 'manual';
+  environment: Environment;
+}
