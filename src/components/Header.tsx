@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, Search, Shield, ChevronDown, RefreshCw, Globe, FlaskConical, Code2 } from 'lucide-react';
 import { View, User, Role, Environment } from '../types';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   view: View;
@@ -38,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-6">
         <div className="flex flex-col">
           <h2 className="text-[10px] font-black text-neon-blue uppercase tracking-[0.3em] mb-0.5">Current Module</h2>
-          <span className="text-sm font-bold text-white uppercase tracking-widest">{view}</span>
+          <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{view}</span>
         </div>
         <div className="h-8 w-px bg-glass-border"></div>
         
@@ -133,6 +134,8 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">v{version}</span>
         </div>
 
+        <ThemeToggle />
+
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-neon-blue/5 border border-neon-blue/20 rounded-xl">
           <RefreshCw size={10} className="text-neon-blue animate-spin-slow" />
           <span className="text-[8px] font-black text-neon-blue uppercase tracking-widest">API Optimized</span>
@@ -140,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="flex items-center gap-3 pl-4 border-l border-glass-border">
           <div className="flex flex-col items-end hidden sm:flex">
-            <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-none">{user.name}</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{user.name}</span>
             <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Authorized User</span>
           </div>
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-neon-blue to-neon-purple p-[1px] shadow-lg shadow-neon-blue/10">

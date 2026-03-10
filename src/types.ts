@@ -68,3 +68,11 @@ export interface Deployment {
   environment: Environment;
   duration: string;
 }
+
+export type ThemeMode = 'dark' | 'light';
+export type AccentColor = 'blue' | 'purple' | 'emerald' | 'rose' | 'amber';
+
+export interface ThemeConfig {
+  mode: ThemeMode;
+  accent: AccentColor;
+}

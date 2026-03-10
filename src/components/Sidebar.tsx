@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView
     </div>
 
     <div className="p-6 flex items-center gap-3 border-b border-glass-border relative z-10">
-      <div className="bg-gradient-to-br from-neon-blue to-neon-purple p-2 rounded-xl text-deep-space shrink-0 shadow-[0_0_20px_rgba(0,242,255,0.4)]">
+      <div className="bg-gradient-to-br from-neon-blue to-neon-purple p-2 rounded-xl text-deep-space shrink-0 shadow-[0_0_20px_var(--neon-accent-glow)]">
         <Workflow size={24} />
       </div>
       {isOpen && (
@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView
           animate={{ opacity: 1, x: 0 }}
           className="flex flex-col"
         >
-          <span className="font-black text-sm tracking-tighter whitespace-nowrap text-white uppercase italic">
+          <span className="font-black text-sm tracking-tighter whitespace-nowrap text-slate-900 dark:text-white uppercase italic">
             Nexus OS
           </span>
           <div className="flex items-center gap-1 mt-0.5">

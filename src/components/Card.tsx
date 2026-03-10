@@ -15,7 +15,7 @@ export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "glass-card text-slate-300",
+        "glass-card text-slate-600 dark:text-slate-300 transition-colors duration-300",
         className
       )}
       {...props}

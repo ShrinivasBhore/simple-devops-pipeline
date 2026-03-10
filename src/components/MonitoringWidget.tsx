@@ -20,7 +20,7 @@ export const MonitoringWidget: React.FC<MonitoringWidgetProps> = ({ label, value
 
   const neonColor = color.includes('emerald') ? 'bg-neon-green' : 
                    color.includes('violet') ? 'bg-neon-purple' : 
-                   color.includes('sky') ? 'bg-neon-blue' : 'bg-neon-blue';
+                   'bg-neon-blue';
 
   return (
     <div className="bg-glass p-4 rounded-xl border border-glass-border relative overflow-hidden group">
