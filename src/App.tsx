@@ -32,6 +32,7 @@ import { PipelineView } from './components/PipelineView';
 import { LogsView } from './components/LogsView';
 import { DatabaseView } from './components/DatabaseView';
 import { DeploymentHistory } from './components/DeploymentHistory';
+import { AnalyticsView } from './components/AnalyticsView';
 import { useNotifications } from './NotificationContext';
 import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment, Deployment } from './types';
 
@@ -422,6 +423,8 @@ export default function App() {
             </div>
           </motion.div>
         );
+      case 'analytics':
+        return <AnalyticsView />;
       case 'infrastructure':
         return (
           <InfrastructureView 

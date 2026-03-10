@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Workflow, Home, FileCode, Terminal, Database, Settings, X, Menu, LucideIcon, Server, Box, Shield } from 'lucide-react';
+import { Workflow, Home, FileCode, Terminal, Database, Settings, X, Menu, LucideIcon, Server, Box, Shield, BarChart3 } from 'lucide-react';
 import { View, Role } from '../types';
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const navItems: { id: View; label: string; icon: LucideIcon }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'pipeline', label: 'CI/CD Pipeline', icon: Workflow },
   { id: 'infrastructure', label: 'Infrastructure', icon: Server },
   { id: 'containers', label: 'Containers', icon: Box },

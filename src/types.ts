@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers' | 'pipeline';
+export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers' | 'pipeline' | 'analytics';
 export type PipelineStatus = 'idle' | 'running' | 'success' | 'failed';
 export type Environment = 'development' | 'staging' | 'production';
 
