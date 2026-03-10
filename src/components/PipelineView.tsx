@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Card } from './Card';
 import { Badge } from './Badge';
+import { useNotifications } from '../NotificationContext';
 
 interface PipelineStep {
   id: number;
@@ -40,6 +41,7 @@ const initialSteps: PipelineStep[] = [
 ];
 
 export const PipelineView: React.FC = () => {
+  const { addNotification } = useNotifications();
   const [steps, setSteps] = useState<PipelineStep[]>(initialSteps);
   const [isDeploying, setIsDeploying] = useState(false);
   const [isRollingBack, setIsRollingBack] = useState(false);
@@ -48,6 +50,7 @@ export const PipelineView: React.FC = () => {
   const runPipeline = async () => {
     setIsDeploying(true);
     setPipelineStatus('running');
+    addNotification('Deployment Started', 'Neural CI/CD pipeline v4.0.2 has been initiated.', 'info');
     
     // Reset steps to pending starting from step 7
     setSteps(prev => prev.map(s => s.id >= 7 ? { ...s, status: 'pending' } : s));
@@ -74,17 +77,20 @@ export const PipelineView: React.FC = () => {
     
     if (!step8Success) {
       setPipelineStatus('failed');
+      addNotification('Deployment Failed', 'Critical regression detected in Health Verification step.', 'error');
       // Trigger automatic rollback after a short delay
       setTimeout(() => triggerRollback(), 2000);
     } else {
       setPipelineStatus('success');
       setIsDeploying(false);
+      addNotification('Deployment Successful', 'All systems verified. v4.0.2 is now live.', 'success');
     }
   };
 
   const triggerRollback = async () => {
     setIsRollingBack(true);
     setPipelineStatus('rollback');
+    addNotification('Auto-Rollback Initiated', 'System is reverting to the last stable version (v4.0.1).', 'warning');
     
     // Simulate rollback process
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -95,6 +101,7 @@ export const PipelineView: React.FC = () => {
     setIsRollingBack(false);
     setIsDeploying(false);
     setPipelineStatus('idle');
+    addNotification('Rollback Complete', 'System stability restored. Reverted to v4.0.1.', 'success');
   };
 
   return (

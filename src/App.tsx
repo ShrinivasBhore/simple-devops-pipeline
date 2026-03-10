@@ -32,9 +32,11 @@ import { PipelineView } from './components/PipelineView';
 import { LogsView } from './components/LogsView';
 import { DatabaseView } from './components/DatabaseView';
 import { DeploymentHistory } from './components/DeploymentHistory';
+import { useNotifications } from './NotificationContext';
 import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment, Deployment } from './types';
 
 export default function App() {
+  const { addNotification } = useNotifications();
   const [view, setView] = useState<View>('dashboard');
   const [user, setUser] = useState<User>({
     name: 'Shrinivas Bhore',
@@ -63,6 +65,15 @@ export default function App() {
     timestamp: '2 mins ago',
     status: 'success'
   });
+
+  useEffect(() => {
+    // Initial system alerts
+    const timer = setTimeout(() => {
+      addNotification('System Warning', 'CPU usage on Node-04 exceeded 85% threshold.', 'warning');
+      addNotification('Container Failure', 'Service "auth-api-v2" exited unexpectedly on cluster-alpha.', 'error');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [addNotification]);
 
   const [deployments] = useState<Deployment[]>([
     {

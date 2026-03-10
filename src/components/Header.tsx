@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, Search, Shield, ChevronDown, RefreshCw, Globe, FlaskConical, Code2 } from 'lucide-react';
 import { View, User, Role, Environment } from '../types';
 import { ThemeToggle } from './ThemeToggle';
+import { NotificationCenter } from './NotificationCenter';
 
 interface HeaderProps {
   view: View;
@@ -135,6 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <ThemeToggle />
+        <NotificationCenter />
 
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-neon-blue/5 border border-neon-blue/20 rounded-xl">
           <RefreshCw size={10} className="text-neon-blue animate-spin-slow" />
