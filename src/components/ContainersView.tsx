@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Box, 
@@ -14,9 +14,16 @@ import {
   Plus,
   Filter,
   ExternalLink,
-  Trash2
+  Trash2,
+  Heart,
+  AlertCircle,
+  CheckCircle2,
+  Globe,
+  FlaskConical,
+  Code2,
+  RefreshCw
 } from 'lucide-react';
-import { Container, Role, LogLevel } from '../types';
+import { Container, Role, LogLevel, Environment } from '../types';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
@@ -26,60 +33,72 @@ const initialContainers: Container[] = [
     name: 'api-gateway-v2',
     image: 'nginx:alpine',
     status: 'running',
+    health: 'healthy',
     cpu: '0.4%',
     memory: '128MB',
     uptime: '14d 2h',
-    ports: ['80:80', '443:443']
+    ports: ['80:80', '443:443'],
+    environment: 'production'
   },
   {
     id: 'c-3a9b4',
     name: 'auth-service',
     image: 'node:18-slim',
     status: 'running',
+    health: 'healthy',
     cpu: '1.2%',
     memory: '256MB',
     uptime: '14d 2h',
-    ports: ['3001:3001']
+    ports: ['3001:3001'],
+    environment: 'production'
   },
   {
     id: 'c-7e1f0',
     name: 'payment-worker',
     image: 'python:3.9-slim',
     status: 'running',
+    health: 'unhealthy',
     cpu: '4.5%',
     memory: '512MB',
     uptime: '3d 12h',
-    ports: []
+    ports: [],
+    environment: 'production'
   },
   {
     id: 'c-2d5c8',
     name: 'redis-cache',
     image: 'redis:7-alpine',
     status: 'running',
+    health: 'healthy',
     cpu: '0.1%',
     memory: '64MB',
     uptime: '45d 6h',
-    ports: ['6379:6379']
+    ports: ['6379:6379'],
+    environment: 'production'
   },
   {
-    id: 'c-1a2b3',
-    name: 'legacy-report-gen',
-    image: 'node:14',
-    status: 'stopped',
-    cpu: '0%',
-    memory: '0MB',
-    uptime: '-',
-    ports: []
+    id: 'c-dev-1',
+    name: 'debug-proxy',
+    image: 'mitmproxy/mitmproxy',
+    status: 'running',
+    health: 'healthy',
+    cpu: '0.8%',
+    memory: '96MB',
+    uptime: '2h 15m',
+    ports: ['8080:8080'],
+    environment: 'development'
   },
   {
-    id: 'c-9f8e7',
-    name: 'db-migration-tool',
-    image: 'alpine:latest',
-    status: 'error',
-    cpu: '0%',
-    memory: '0MB',
-    uptime: '-',
-    ports: []
+    id: 'c-stg-1',
+    name: 'staging-api',
+    image: 'node:18-slim',
+    status: 'running',
+    health: 'starting',
+    cpu: '0.5%',
+    memory: '128MB',
+    uptime: '15m',
+    ports: ['3000:3000'],
+    environment: 'staging'
   }
 ];
 
@@ -91,13 +110,35 @@ interface ContainersViewProps {
 export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog }) => {
   const [containers, setContainers] = useState<Container[]>(initialContainers);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeEnv, setActiveEnv] = useState<Environment | 'all'>('all');
 
   const isReadOnly = userRole === 'viewer';
 
-  const filteredContainers = containers.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.image.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredContainers = containers.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         c.image.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesEnv = activeEnv === 'all' || c.environment === activeEnv;
+    return matchesSearch && matchesEnv;
+  });
+
+  // Simulate periodic health checks
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setContainers(prev => prev.map(c => {
+        if (c.status === 'running' && Math.random() > 0.95) {
+          const newHealth = c.health === 'healthy' ? 'unhealthy' : 'healthy';
+          if (newHealth === 'unhealthy') {
+            onLog(`Container ${c.name} health check failed!`, 'monitoring', 'error');
+          } else {
+            onLog(`Container ${c.name} health check recovered.`, 'monitoring', 'success');
+          }
+          return { ...c, health: newHealth };
+        }
+        return c;
+      }));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [onLog]);
 
   const toggleStatus = (id: string) => {
     const container = containers.find(c => c.id === id);
@@ -111,12 +152,22 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
         return {
           ...c,
           status: newStatus,
+          health: newStatus === 'running' ? 'starting' : 'healthy',
           cpu: newStatus === 'running' ? '0.5%' : '0%',
           memory: newStatus === 'running' ? '128MB' : '0MB'
         };
       }
       return c;
     }));
+
+    if (newStatus === 'running') {
+      setTimeout(() => {
+        setContainers(prev => prev.map(c => {
+          if (c.id === id) return { ...c, health: 'healthy' };
+          return c;
+        }));
+      }, 3000);
+    }
   };
 
   const restartContainer = (id: string) => {
@@ -126,7 +177,7 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
     onLog(`Restarting container: ${container.name}`, 'orchestrator', 'info');
     setContainers(prev => prev.map(c => {
       if (c.id === id) {
-        return { ...c, status: 'restarting' };
+        return { ...c, status: 'restarting', health: 'starting' };
       }
       return c;
     }));
@@ -135,11 +186,19 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
       onLog(`Container ${container.name} successfully restarted.`, 'orchestrator', 'success');
       setContainers(prev => prev.map(c => {
         if (c.id === id) {
-          return { ...c, status: 'running' };
+          return { ...c, status: 'running', health: 'healthy' };
         }
         return c;
       }));
     }, 2000);
+  };
+
+  const getEnvIcon = (env: Environment) => {
+    switch (env) {
+      case 'production': return <Globe size={14} />;
+      case 'staging': return <FlaskConical size={14} />;
+      case 'development': return <Code2 size={14} />;
+    }
   };
 
   return (
@@ -147,9 +206,24 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Container Management</h1>
-          <p className="text-slate-500 mt-1">Orchestrate and monitor your application services.</p>
+          <p className="text-slate-500 mt-1">Orchestrate and monitor your application services across environments.</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
+            {(['all', 'development', 'staging', 'production'] as const).map((env) => (
+              <button
+                key={env}
+                onClick={() => setActiveEnv(env)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  activeEnv === env 
+                    ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20' 
+                    : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {env}
+              </button>
+            ))}
+          </div>
           <button 
             disabled={isReadOnly}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg ${
@@ -164,15 +238,26 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-4 bg-slate-900/40 border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <Activity size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Running Instances</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Running</p>
               <p className="text-xl font-bold text-white">{containers.filter(c => c.status === 'running').length}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4 bg-slate-900/40 border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400">
+              <Heart size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unhealthy</p>
+              <p className="text-xl font-bold text-white">{containers.filter(c => c.health === 'unhealthy').length}</p>
             </div>
           </div>
         </Card>
@@ -193,7 +278,7 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
               <Database size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Storage Usage</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Storage</p>
               <p className="text-xl font-bold text-white">4.2 GB</p>
             </div>
           </div>
@@ -227,7 +312,9 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
-              <Card className="p-5 bg-slate-900/40 border-slate-800 hover:border-slate-700 transition-all group">
+              <Card className={`p-5 bg-slate-900/40 border-slate-800 hover:border-slate-700 transition-all group ${
+                container.health === 'unhealthy' ? 'border-rose-500/30 bg-rose-500/5' : ''
+              }`}>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-xl ${
@@ -247,8 +334,25 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog 
                         } className="text-[10px] py-0 px-2 h-5">
                           {container.status}
                         </Badge>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700">
+                          <span className="text-slate-400">{getEnvIcon(container.environment)}</span>
+                          <span className="text-[8px] font-black uppercase tracking-tighter text-slate-400">{container.environment}</span>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 font-mono">{container.image}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <p className="text-xs text-slate-500 font-mono">{container.image}</p>
+                        <div className="w-1 h-1 rounded-full bg-slate-700" />
+                        <div className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest ${
+                          container.health === 'healthy' ? 'text-emerald-500' :
+                          container.health === 'unhealthy' ? 'text-rose-500' :
+                          'text-amber-500'
+                        }`}>
+                          {container.health === 'healthy' ? <CheckCircle2 size={12} /> : 
+                           container.health === 'unhealthy' ? <AlertCircle size={12} /> : 
+                           <RefreshCw size={12} className="animate-spin" />}
+                          {container.health}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

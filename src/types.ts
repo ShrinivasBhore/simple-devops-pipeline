@@ -1,5 +1,6 @@
 export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers' | 'pipeline';
 export type PipelineStatus = 'idle' | 'running' | 'success' | 'failed';
+export type Environment = 'development' | 'staging' | 'production';
 
 export interface Commit {
   id: string;
@@ -41,8 +42,10 @@ export interface Container {
   name: string;
   image: string;
   status: 'running' | 'stopped' | 'restarting' | 'error';
+  health: 'healthy' | 'unhealthy' | 'starting';
   cpu: string;
   memory: string;
   uptime: string;
   ports: string[];
+  environment: Environment;
 }

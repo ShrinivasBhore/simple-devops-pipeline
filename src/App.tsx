@@ -30,7 +30,7 @@ import { InfrastructureView } from './components/InfrastructureView';
 import { ContainersView } from './components/ContainersView';
 import { PipelineView } from './components/PipelineView';
 import { LogsView } from './components/LogsView';
-import { View, Commit, Prediction, User, Role, LogEntry, LogLevel } from './types';
+import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment } from './types';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -45,6 +45,7 @@ export default function App() {
   const [dbStatus, setDbStatus] = useState<'connected' | 'error'>('connected');
   const [pipelineStatus, setPipelineStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [version, setVersion] = useState('4.0.1');
+  const [environment, setEnvironment] = useState<Environment>('production');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [cpuUsage, setCpuUsage] = useState(42);
   const [memUsage, setMemUsage] = useState(68);
@@ -254,9 +255,10 @@ export default function App() {
                     </div>
                   </div>
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <MonitoringWidget label="CPU Usage" value={cpuUsage} icon="cpu" color="text-violet-500" />
                       <MonitoringWidget label="Memory Usage" value={memUsage} icon="memory" color="text-emerald-500" />
+                      <MonitoringWidget label="Cluster Health" value={98.4} icon="health" color="text-rose-500" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <MonitoringWidget label="Network Load" value={netUsage} icon="network" color="text-sky-500" />
@@ -623,7 +625,9 @@ jobs:
           view={view} 
           version={version} 
           user={user} 
+          environment={environment}
           onRoleChange={(role) => setUser({ ...user, role })}
+          onEnvironmentChange={setEnvironment}
         />
 
         <main className="flex-1 overflow-y-auto p-8 bg-[#0a0c10]">

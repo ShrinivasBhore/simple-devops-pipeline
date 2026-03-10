@@ -1,18 +1,37 @@
 import React from 'react';
-import { Clock, Search, Shield, ChevronDown, RefreshCw } from 'lucide-react';
-import { View, User, Role } from '../types';
+import { Clock, Search, Shield, ChevronDown, RefreshCw, Globe, FlaskConical, Code2 } from 'lucide-react';
+import { View, User, Role, Environment } from '../types';
 
 interface HeaderProps {
   view: View;
   version: string;
   user: User;
+  environment: Environment;
   onRoleChange: (role: Role) => void;
+  onEnvironmentChange: (env: Environment) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ view, version, user, onRoleChange }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  view, 
+  version, 
+  user, 
+  environment,
+  onRoleChange, 
+  onEnvironmentChange 
+}) => {
   const [isRoleMenuOpen, setIsRoleMenuOpen] = React.useState(false);
+  const [isEnvMenuOpen, setIsEnvMenuOpen] = React.useState(false);
 
   const roles: Role[] = ['admin', 'developer', 'viewer'];
+  const environments: Environment[] = ['development', 'staging', 'production'];
+
+  const getEnvIcon = (env: Environment) => {
+    switch (env) {
+      case 'production': return <Globe size={14} className="text-neon-blue" />;
+      case 'staging': return <FlaskConical size={14} className="text-neon-purple" />;
+      case 'development': return <Code2 size={14} className="text-neon-green" />;
+    }
+  };
 
   return (
     <header className="h-16 bg-deep-space/50 backdrop-blur-md border-b border-glass-border flex items-center justify-between px-8 shrink-0 relative z-40">
@@ -22,15 +41,43 @@ export const Header: React.FC<HeaderProps> = ({ view, version, user, onRoleChang
           <span className="text-sm font-bold text-white uppercase tracking-widest">{view}</span>
         </div>
         <div className="h-8 w-px bg-glass-border"></div>
-        <div className="hidden lg:flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-          <div className="flex items-center gap-1.5">
-            <Clock size={12} className="text-neon-blue" />
-            <span>Uptime: 99.99%</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Shield size={12} className="text-neon-purple" />
-            <span>Encrypted Session</span>
-          </div>
+        
+        <div className="relative">
+          <button 
+            onClick={() => setIsEnvMenuOpen(!isEnvMenuOpen)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-glass border border-glass-border rounded-xl hover:border-neon-blue/50 transition-all"
+          >
+            {getEnvIcon(environment)}
+            <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">{environment}</span>
+            <ChevronDown size={12} className="text-slate-500" />
+          </button>
+          
+          {isEnvMenuOpen && (
+            <div className="absolute left-0 mt-3 w-48 bg-deep-space/95 backdrop-blur-2xl border border-glass-border rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+              <div className="p-3 border-b border-glass-border bg-glass">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] px-2">Deployment Context</p>
+              </div>
+              <div className="p-1">
+                {environments.map((env) => (
+                  <button
+                    key={env}
+                    onClick={() => {
+                      onEnvironmentChange(env);
+                      setIsEnvMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-xl flex items-center gap-3 ${
+                      environment === env 
+                        ? 'bg-neon-blue/10 text-neon-blue' 
+                        : 'text-slate-400 hover:bg-glass hover:text-white'
+                    }`}
+                  >
+                    {getEnvIcon(env)}
+                    {env}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

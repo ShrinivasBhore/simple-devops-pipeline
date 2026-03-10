@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Cpu, HardDrive, Globe, Database } from 'lucide-react';
+import { Cpu, HardDrive, Globe, Database, Heart } from 'lucide-react';
 
 interface MonitoringWidgetProps {
   label: string;
   value: number;
-  icon: 'cpu' | 'memory' | 'network' | 'disk';
+  icon: 'cpu' | 'memory' | 'network' | 'disk' | 'health';
   color: string;
 }
 
@@ -15,6 +15,7 @@ export const MonitoringWidget: React.FC<MonitoringWidgetProps> = ({ label, value
     memory: HardDrive,
     network: Globe,
     disk: Database,
+    health: Heart,
   }[icon];
 
   const neonColor = color.includes('emerald') ? 'bg-neon-green' : 
