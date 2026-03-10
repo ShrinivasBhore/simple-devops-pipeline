@@ -7,7 +7,7 @@ import { MonitoringWidget } from './MonitoringWidget';
 import { PerformanceChart } from './PerformanceChart';
 import { NodeList } from './NodeList';
 
-import { View, Role } from '../types';
+import { View, Role, LogLevel } from '../types';
 
 interface InfrastructureViewProps {
   cpuUsage: number;
@@ -16,6 +16,7 @@ interface InfrastructureViewProps {
   diskUsage: number;
   performanceData: {time: string, cpu: number, memory: number}[];
   userRole: Role;
+  onLog: (message: string, service: string, level: LogLevel) => void;
 }
 
 export const InfrastructureView: React.FC<InfrastructureViewProps> = ({ 
@@ -24,7 +25,8 @@ export const InfrastructureView: React.FC<InfrastructureViewProps> = ({
   netUsage, 
   diskUsage, 
   performanceData,
-  userRole
+  userRole,
+  onLog
 }) => {
   const isReadOnly = userRole === 'viewer';
   return (
@@ -39,7 +41,10 @@ export const InfrastructureView: React.FC<InfrastructureViewProps> = ({
             <Activity size={12} className="mr-1" />
             All Systems Operational
           </Badge>
-          <button className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors border border-slate-700">
+          <button 
+            onClick={() => onLog('Infrastructure health report exported.', 'system', 'info')}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors border border-slate-700"
+          >
             Export Report
           </button>
         </div>
@@ -149,6 +154,7 @@ export const InfrastructureView: React.FC<InfrastructureViewProps> = ({
             </p>
             <button 
               disabled={isReadOnly}
+              onClick={() => onLog('Accessing security audit logs...', 'security', 'info')}
               className={`w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${
                 isReadOnly 
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 

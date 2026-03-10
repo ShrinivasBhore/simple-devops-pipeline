@@ -1,1 +1,59 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-neon-blue: #00f2ff;
+  --color-neon-purple: #bc13fe;
+  --color-neon-green: #39ff14;
+  --color-deep-space: #05070a;
+  --color-glass: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+@layer base {
+  body {
+    @apply bg-deep-space text-slate-300 font-sans selection:bg-neon-blue/30 selection:text-neon-blue;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-glass backdrop-blur-xl border border-glass-border rounded-2xl shadow-2xl;
+  }
+  
+  .neon-glow-blue {
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+  }
+  
+  .neon-glow-purple {
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+  }
+
+  .futuristic-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .futuristic-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .futuristic-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-neon-blue/20 rounded-full hover:bg-neon-blue/40 transition-colors;
+  }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+  }
+}

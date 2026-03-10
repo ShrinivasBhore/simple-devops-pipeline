@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers';
+export type View = 'dashboard' | 'guide' | 'logs' | 'database' | 'settings' | 'infrastructure' | 'containers' | 'pipeline';
 export type PipelineStatus = 'idle' | 'running' | 'success' | 'failed';
 
 export interface Commit {
@@ -17,6 +17,17 @@ export interface Prediction {
 }
 
 export type Role = 'admin' | 'developer' | 'viewer';
+
+export type LogLevel = 'info' | 'warn' | 'error' | 'success' | 'debug';
+
+export interface LogEntry {
+  id: string;
+  timestamp: string;
+  service: string;
+  level: LogLevel;
+  message: string;
+  metadata?: Record<string, any>;
+}
 
 export interface User {
   name: string;

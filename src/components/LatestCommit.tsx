@@ -10,37 +10,45 @@ interface LatestCommitProps {
 }
 
 export const LatestCommit: React.FC<LatestCommitProps> = ({ commit, onSimulateChange, userRole }) => (
-  <Card className="p-6">
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="font-bold text-lg flex items-center gap-2 text-white">
-        <Github size={18} className="text-slate-400" />
-        Latest Commit
+  <Card className="p-6 border-neon-blue/10">
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="font-black text-lg flex items-center gap-2 text-white uppercase tracking-tighter italic">
+        <Github size={18} className="text-neon-blue" />
+        Neural Commit
       </h3>
       <button 
         onClick={onSimulateChange}
         disabled={userRole === 'viewer'}
-        className={`text-[10px] px-2 py-1 rounded border transition-colors flex items-center gap-1 ${
+        className={`text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl transition-all flex items-center gap-2 ${
           userRole === 'viewer' 
-            ? 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed' 
-            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+            ? 'bg-glass text-slate-600 border border-glass-border cursor-not-allowed' 
+            : 'bg-neon-blue/10 hover:bg-neon-blue/20 text-neon-blue border border-neon-blue/30 neon-glow-blue'
         }`}
       >
         <RefreshCw size={10} />
-        Push Change
+        Inject Delta
       </button>
     </div>
-    <div className="space-y-4">
-      <div className="flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-          <History size={16} />
+    <div className="space-y-6">
+      <div className="flex gap-4">
+        <div className="w-10 h-10 rounded-xl bg-glass border border-glass-border flex items-center justify-center text-neon-blue shrink-0 shadow-inner">
+          <History size={18} />
         </div>
         <div>
-          <p className="text-xs font-bold text-white leading-tight">{commit.message}</p>
-          <p className="text-[10px] text-slate-500 mt-1">{commit.author} committed {commit.timestamp}</p>
+          <p className="text-xs font-black text-white leading-relaxed tracking-tight">{commit.message}</p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[9px] text-neon-blue font-bold uppercase tracking-widest">{commit.author}</span>
+            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">• {commit.timestamp}</span>
+          </div>
         </div>
       </div>
-      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-800">
-        <p className="text-[10px] text-slate-500 font-mono truncate">SHA: {commit.id}</p>
+      <div className="p-3 bg-glass rounded-xl border border-glass-border flex items-center justify-between">
+        <p className="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Hash: {commit.id}</p>
+        <div className="flex gap-1">
+          <div className="w-1 h-1 rounded-full bg-neon-blue" />
+          <div className="w-1 h-1 rounded-full bg-neon-blue/50" />
+          <div className="w-1 h-1 rounded-full bg-neon-blue/20" />
+        </div>
       </div>
     </div>
   </Card>

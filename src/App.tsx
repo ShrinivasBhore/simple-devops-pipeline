@@ -28,7 +28,9 @@ import { CodeBlock } from './components/CodeBlock';
 import { PerformanceChart } from './components/PerformanceChart';
 import { InfrastructureView } from './components/InfrastructureView';
 import { ContainersView } from './components/ContainersView';
-import { View, Commit, Prediction, User, Role } from './types';
+import { PipelineView } from './components/PipelineView';
+import { LogsView } from './components/LogsView';
+import { View, Commit, Prediction, User, Role, LogEntry, LogLevel } from './types';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -43,7 +45,7 @@ export default function App() {
   const [dbStatus, setDbStatus] = useState<'connected' | 'error'>('connected');
   const [pipelineStatus, setPipelineStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [version, setVersion] = useState('1.2.4');
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [cpuUsage, setCpuUsage] = useState(42);
   const [memUsage, setMemUsage] = useState(68);
   const [netUsage, setNetUsage] = useState(12);
@@ -74,61 +76,90 @@ export default function App() {
     return () => clearInterval(interval);
   }, [cpuUsage, memUsage]);
 
-  const addLog = (msg: string) => {
-    setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`].slice(-50));
+  useEffect(() => {
+    addLog('System initialized. Monitoring all services.', 'system', 'success');
+    addLog('Connected to MongoDB cluster at mongodb://database:27017', 'database', 'info');
+    addLog('Infrastructure nodes synchronized.', 'infrastructure', 'info');
+    addLog('Security guard active. Monitoring for anomalies.', 'security', 'info');
+  }, []);
+
+  const addLog = (message: string, service: string = 'system', level: LogLevel = 'info', metadata?: any) => {
+    const newLog: LogEntry = {
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toLocaleTimeString(),
+      service,
+      level,
+      message,
+      metadata
+    };
+    setLogs(prev => [...prev, newLog].slice(-100));
   };
 
   const triggerPipeline = () => {
     if (pipelineStatus === 'running') return;
     
     if (user.role === 'viewer') {
-      addLog('❌ Permission Denied: Viewers cannot trigger deployments.');
+      addLog('Permission Denied: Viewers cannot trigger deployments.', 'security', 'error');
       return;
     }
     
     setPipelineStatus('running');
-    addLog('🚀 Starting manual deployment pipeline...');
-    addLog('🔍 Validating infrastructure state...');
+    addLog('Initializing Neural CI/CD Pipeline v4.0...', 'pipeline', 'info');
+    addLog('Validating configuration manifest...', 'pipeline', 'info');
     
     setTimeout(() => {
-      addLog('📦 Pulling latest changes from main branch...');
+      addLog('Step 1/8: Static Analysis & Linting...', 'pipeline', 'info');
       setTimeout(() => {
-        addLog('🔨 Building Docker images (api-gateway, auth-service)...');
+        addLog('Linting complete. 0 errors, 4 warnings (ignored).', 'pipeline', 'success');
+        addLog('Step 2/8: Security Vulnerability Scan (SAST)...', 'security', 'info');
         setTimeout(() => {
-          addLog('🧪 Running automated tests & security scans...');
+          addLog('Security scan complete. No high-severity vulnerabilities found.', 'security', 'success');
+          addLog('Step 3/8: Unit & Integration Testing...', 'pipeline', 'info');
           setTimeout(() => {
-            addLog('✅ Tests passed. Pushing images to private registry...');
+            addLog('All 142 tests passed (coverage: 94.2%).', 'pipeline', 'success');
+            addLog('Step 4/8: Building Optimized Production Artifacts...', 'pipeline', 'info');
             setTimeout(() => {
-              addLog('🚢 Orchestrating container rollout (Rolling Update)...');
-              addLog('🔄 Stopping old instances of auth-service...');
-              addLog('✨ Starting new instances of auth-service v' + version + '...');
-              
+              addLog('Build successful. Artifact size: 142MB.', 'pipeline', 'success');
+              addLog('Step 5/8: Containerizing & Tagging Images...', 'orchestrator', 'info');
               setTimeout(() => {
-                addLog('🌐 Updating load balancer configurations...');
-                setPipelineStatus('success');
-                setDeploymentCount(prev => prev + 1);
-                addLog('✨ Deployment successful! Service orchestration complete.');
-                
-                const vParts = version.split('.');
-                const newV = `${vParts[0]}.${vParts[1]}.${parseInt(vParts[2]) + 1}`;
-                setVersion(newV);
-                
-                setTimeout(() => setPipelineStatus('idle'), 3000);
-              }, 1500);
-            }, 1000);
+                addLog('Images pushed to Nexus Registry: v' + version + '-stable', 'orchestrator', 'success');
+                addLog('Step 6/8: Initializing Canary Deployment (5% traffic)...', 'network', 'info');
+                setTimeout(() => {
+                  addLog('Canary health checks: [OK]', 'network', 'success');
+                  addLog('Step 7/8: Full Rollout & Traffic Migration...', 'orchestrator', 'info');
+                  addLog('Scaling up new clusters...', 'orchestrator', 'info');
+                  addLog('Draining legacy connections...', 'orchestrator', 'warn');
+                  
+                  setTimeout(() => {
+                    addLog('Step 8/8: Post-Deployment Health Verification...', 'system', 'info');
+                    addLog('Latency: 42ms | Error Rate: 0.01%', 'system', 'success');
+                    
+                    setPipelineStatus('success');
+                    setDeploymentCount(prev => prev + 1);
+                    addLog('Neural Deployment Successful. Cluster synchronized.', 'pipeline', 'success');
+                    
+                    const vParts = version.split('.');
+                    const newV = `${vParts[0]}.${vParts[1]}.${parseInt(vParts[2]) + 1}`;
+                    setVersion(newV);
+                    
+                    setTimeout(() => setPipelineStatus('idle'), 3000);
+                  }, 1500);
+                }, 1500);
+              }, 1000);
+            }, 1200);
           }, 1500);
-        }, 1500);
+        }, 1200);
       }, 1000);
     }, 800);
   };
 
   const simulateChange = () => {
     if (user.role === 'viewer') {
-      addLog('❌ Permission Denied: Viewers cannot simulate changes.');
+      addLog('Permission Denied: Viewers cannot simulate changes.', 'security', 'error');
       return;
     }
     setIsAnalyzing(true);
-    addLog('🔍 Detecting code changes...');
+    addLog('Detecting code changes...', 'ai', 'info');
     
     setTimeout(() => {
       setLatestCommit({
@@ -147,7 +178,7 @@ export default function App() {
       });
       
       setIsAnalyzing(false);
-      addLog('✅ AI Analysis complete. No critical risks detected.');
+      addLog('AI Analysis complete. No critical risks detected.', 'ai', 'success');
     }, 2000);
   };
 
@@ -240,70 +271,71 @@ export default function App() {
 
                 <AIGuardrail prediction={prediction} isAnalyzing={isAnalyzing} userRole={user.role} />
 
-                <Card className="p-6">
+                <Card className="p-6 border-neon-blue/10">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-lg flex items-center gap-2 text-white">
-                      <Terminal size={20} className="text-violet-400" />
-                      Deployment Logs
+                    <h3 className="font-black text-lg flex items-center gap-2 text-white uppercase tracking-tighter italic">
+                      <Terminal size={20} className="text-neon-blue" />
+                      Neural Log Stream
                     </h3>
-                    <button className="text-[10px] text-violet-400 font-bold hover:underline uppercase tracking-wider">View All</button>
+                    <button className="text-[10px] text-neon-blue font-black hover:underline uppercase tracking-[0.2em]">Access Archive</button>
                   </div>
                   <LogTerminal logs={logs} />
                   {pipelineStatus === 'running' && (
-                    <div className="flex items-center gap-2 text-violet-400 animate-pulse mt-2">
+                    <div className="flex items-center gap-2 text-neon-blue animate-pulse mt-4 bg-neon-blue/5 p-2 rounded-lg border border-neon-blue/20">
                       <RefreshCw size={12} className="animate-spin" />
-                      <span>Pipeline executing...</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Syncing with remote clusters...</span>
                     </div>
                   )}
                 </Card>
               </div>
 
               <div className="space-y-8">
-                <Card className="p-6 bg-violet-600 text-white shadow-xl shadow-violet-900/20 border-none">
-                  <h3 className="font-bold mb-4 flex items-center gap-2">
-                    <Workflow size={18} />
-                    Quick Actions
+                <Card className="p-6 relative overflow-hidden group border-none bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 neon-glow-blue">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-neon-blue/20 blur-3xl group-hover:bg-neon-blue/40 transition-all duration-500" />
+                  <h3 className="font-black mb-4 flex items-center gap-2 text-white uppercase tracking-tighter italic">
+                    <Workflow size={18} className="text-neon-blue" />
+                    Neural Deployment
                   </h3>
-                  <p className="text-violet-100 text-xs mb-6 leading-relaxed">Trigger a manual CI/CD pipeline build and deployment.</p>
+                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-6 leading-relaxed">Execute autonomous CI/CD pipeline with AI-driven risk mitigation.</p>
                   <button 
                     onClick={() => triggerPipeline()}
                     disabled={pipelineStatus === 'running' || user.role === 'viewer'}
-                    className={`w-full py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-2 relative z-10 ${
                       pipelineStatus === 'running' 
-                        ? 'bg-violet-500/50 cursor-not-allowed' 
+                        ? 'bg-neon-blue/20 text-neon-blue cursor-not-allowed border border-neon-blue/30' 
                         : user.role === 'viewer'
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                        : 'bg-white text-violet-600 hover:bg-violet-50 shadow-lg'
+                        ? 'bg-glass text-slate-600 cursor-not-allowed border border-glass-border'
+                        : 'bg-neon-blue text-deep-space hover:shadow-[0_0_30px_rgba(0,242,255,0.5)] hover:scale-[1.02] active:scale-[0.98]'
                     }`}
                   >
                     {pipelineStatus === 'running' ? (
-                      <RefreshCw size={18} className="animate-spin" />
+                      <RefreshCw size={16} className="animate-spin" />
                     ) : (
-                      <Plus size={18} />
+                      <Plus size={16} />
                     )}
-                    {pipelineStatus === 'running' ? 'Deploying...' : 'New Deployment'}
+                    {pipelineStatus === 'running' ? 'Synchronizing...' : 'Initialize Build'}
                   </button>
                 </Card>
 
                 <LatestCommit commit={latestCommit} onSimulateChange={simulateChange} userRole={user.role} />
 
-                <Card className="p-6">
-                  <h3 className="font-bold mb-4 flex items-center gap-2 text-white">
-                    <BarChart3 size={18} className="text-slate-400" />
-                    Project Health
+                <Card className="p-6 border-neon-purple/20">
+                  <h3 className="font-black mb-6 flex items-center gap-2 text-white uppercase tracking-tighter italic">
+                    <BarChart3 size={18} className="text-neon-purple" />
+                    System Metrics
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500 text-sm">Success Rate</span>
-                      <span className="text-emerald-400 font-mono font-bold">98.4%</span>
+                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Success Rate</span>
+                      <span className="text-neon-green font-mono font-bold text-sm shadow-[0_0_10px_rgba(57,255,20,0.2)]">98.4%</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500 text-sm">Avg. Build Time</span>
-                      <span className="text-white font-mono font-bold">2m 45s</span>
+                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Avg. Build Time</span>
+                      <span className="text-white font-mono font-bold text-sm">2m 45s</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500 text-sm">Deployments/Day</span>
-                      <span className="text-white font-mono font-bold">14</span>
+                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Deployments/Day</span>
+                      <span className="text-white font-mono font-bold text-sm">14</span>
                     </div>
                   </div>
                 </Card>
@@ -342,6 +374,7 @@ export default function App() {
             diskUsage={diskUsage}
             performanceData={performanceData}
             userRole={user.role}
+            onLog={addLog}
           />
         );
       case 'containers':
@@ -352,21 +385,20 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <ContainersView userRole={user.role} />
+            <ContainersView userRole={user.role} onLog={addLog} />
           </motion.div>
         );
+      case 'pipeline':
+        return <PipelineView />;
       case 'logs':
         return (
           <motion.div 
             key="logs"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
           >
-            <h1 className="text-3xl font-bold text-white tracking-tight">System Logs</h1>
-            <Card className="p-6">
-              <LogTerminal logs={logs} />
-            </Card>
+            <LogsView logs={logs} onClearLogs={() => setLogs([])} />
           </motion.div>
         );
       case 'database':

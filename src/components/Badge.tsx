@@ -14,16 +14,16 @@ interface BadgeProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export function Badge({ className, variant = 'default', ...props }: BadgeProps) {
   const variants = {
-    default: "bg-slate-800 text-slate-400 border-slate-700",
-    success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    danger: "bg-red-500/10 text-red-400 border-red-500/20",
+    default: "bg-glass text-slate-400 border-glass-border",
+    success: "bg-neon-green/10 text-neon-green border-neon-green/20 shadow-[0_0_10px_rgba(57,255,20,0.1)]",
+    warning: "bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]",
+    danger: "bg-rose-500/10 text-rose-400 border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]",
   };
 
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors",
+        "inline-flex items-center rounded-lg border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.15em] transition-all",
         variants[variant],
         className
       )}

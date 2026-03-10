@@ -12,78 +12,89 @@ interface AIGuardrailProps {
 }
 
 export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzing, userRole }) => (
-  <Card className="p-6">
-    <div className="flex items-center justify-between mb-6">
-      <h3 className="font-bold text-lg flex items-center gap-2 text-white">
-        <BrainCircuit size={20} className="text-violet-400" />
-        AI Deployment Guardrail
+  <Card className="p-6 border-neon-purple/20 relative overflow-hidden">
+    <div className="absolute top-0 right-0 w-32 h-32 bg-neon-purple/5 blur-3xl pointer-events-none" />
+    
+    <div className="flex items-center justify-between mb-8">
+      <h3 className="font-black text-lg flex items-center gap-2 text-white uppercase tracking-tighter italic">
+        <BrainCircuit size={20} className="text-neon-purple" />
+        Neural Guardrail
       </h3>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {userRole === 'viewer' && (
-          <Badge variant="default" className="bg-slate-800 text-slate-500 border-slate-700 flex items-center gap-1">
-            <Lock size={10} /> Read Only
+          <Badge variant="default" className="bg-glass text-slate-500 border-glass-border flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+            <Lock size={10} /> Secure Read
           </Badge>
         )}
         {prediction && (
-          <Badge variant={prediction.risk === 'Low' ? 'success' : prediction.risk === 'Medium' ? 'warning' : 'danger'}>
-            {prediction.risk} Risk
+          <Badge 
+            variant={prediction.risk === 'Low' ? 'success' : prediction.risk === 'Medium' ? 'warning' : 'danger'}
+            className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 shadow-[0_0_10px_rgba(0,0,0,0.3)]"
+          >
+            {prediction.risk} Threat Level
           </Badge>
         )}
       </div>
     </div>
 
     {!prediction && !isAnalyzing ? (
-      <div className="text-center py-8">
-        <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
-          <ShieldCheck size={24} />
+      <div className="text-center py-12 bg-glass rounded-2xl border border-glass-border border-dashed">
+        <div className="w-14 h-14 bg-deep-space rounded-2xl border border-glass-border flex items-center justify-center mx-auto mb-4 text-slate-700 shadow-inner">
+          <ShieldCheck size={28} />
         </div>
-        <p className="text-xs text-slate-500 mb-4">No analysis data available. Trigger a deployment to run AI risk assessment.</p>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest max-w-[200px] mx-auto leading-relaxed">System idle. Awaiting neural synchronization for risk assessment.</p>
       </div>
     ) : isAnalyzing ? (
-      <div className="space-y-4 py-4">
-        <div className="flex items-center gap-3 text-violet-400 animate-pulse">
-          <RefreshCw size={16} className="animate-spin" />
-          <span className="text-xs font-bold uppercase tracking-wider">AI is analyzing commit patterns...</span>
+      <div className="space-y-6 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-neon-purple animate-pulse">
+            <RefreshCw size={18} className="animate-spin" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Scanning Neural Patterns...</span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-500">Processing Delta...</span>
         </div>
-        <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-deep-space rounded-full overflow-hidden border border-glass-border">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="h-full bg-violet-500"
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="h-full bg-gradient-to-r from-neon-purple to-neon-blue shadow-[0_0_15px_rgba(188,19,254,0.5)]"
           />
         </div>
       </div>
     ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-6">
           <div className="flex justify-between items-end">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Confidence Score</span>
-            <span className="text-2xl font-bold text-white">{prediction?.confidence}%</span>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Confidence Index</span>
+            <span className="text-3xl font-black text-white tracking-tighter italic">{prediction?.confidence}%</span>
           </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-1 bg-deep-space rounded-full overflow-hidden border border-glass-border">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${prediction?.confidence}%` }}
-              className={`h-full ${prediction?.confidence! > 80 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+              className={`h-full shadow-[0_0_10px_rgba(0,0,0,0.5)] ${prediction?.confidence! > 80 ? 'bg-neon-green' : 'bg-neon-purple'}`}
             />
           </div>
-          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 flex items-center gap-1">
-              <Info size={12} /> AI Recommendation
+          <div className="p-4 bg-glass rounded-2xl border border-glass-border relative group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-neon-purple/30 rounded-l-2xl" />
+            <p className="text-[9px] font-black text-slate-500 uppercase mb-3 flex items-center gap-2 tracking-widest">
+              <Info size={12} className="text-neon-purple" /> Neural Recommendation
             </p>
-            <p className="text-xs text-slate-300 leading-relaxed italic">"{prediction?.recommendation}"</p>
+            <p className="text-xs text-slate-300 leading-relaxed italic font-medium">"{prediction?.recommendation}"</p>
           </div>
         </div>
-        <div className="space-y-3">
-          <span className="text-[10px] font-bold text-slate-500 uppercase">Impact Analysis</span>
-          <div className="flex items-start gap-2 text-xs text-slate-400 bg-slate-800/30 p-3 rounded-lg border border-slate-800/50">
-            {prediction?.risk === 'Low' ? (
-              <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-            ) : (
-              <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-            )}
-            <span className="leading-relaxed">{prediction?.impact}</span>
+        <div className="space-y-4">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Impact Vector Analysis</span>
+          <div className="flex items-start gap-4 text-xs text-slate-400 bg-glass p-4 rounded-2xl border border-glass-border">
+            <div className={`p-2 rounded-xl shrink-0 ${prediction?.risk === 'Low' ? 'bg-neon-green/10 text-neon-green' : 'bg-neon-purple/10 text-neon-purple'}`}>
+              {prediction?.risk === 'Low' ? (
+                <CheckCircle2 size={16} />
+              ) : (
+                <AlertTriangle size={16} />
+              )}
+            </div>
+            <span className="leading-relaxed font-medium mt-1">{prediction?.impact}</span>
           </div>
         </div>
       </div>

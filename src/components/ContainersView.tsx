@@ -16,7 +16,7 @@ import {
   ExternalLink,
   Trash2
 } from 'lucide-react';
-import { Container, Role } from '../types';
+import { Container, Role, LogLevel } from '../types';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
@@ -85,9 +85,10 @@ const initialContainers: Container[] = [
 
 interface ContainersViewProps {
   userRole: Role;
+  onLog: (message: string, service: string, level: LogLevel) => void;
 }
 
-export const ContainersView: React.FC<ContainersViewProps> = ({ userRole }) => {
+export const ContainersView: React.FC<ContainersViewProps> = ({ userRole, onLog }) => {
   const [containers, setContainers] = useState<Container[]>(initialContainers);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -99,13 +100,19 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole }) => {
   );
 
   const toggleStatus = (id: string) => {
+    const container = containers.find(c => c.id === id);
+    if (!container) return;
+
+    const newStatus = container.status === 'running' ? 'stopped' : 'running';
+    onLog(`${newStatus === 'running' ? 'Starting' : 'Stopping'} container: ${container.name}`, 'orchestrator', newStatus === 'running' ? 'info' : 'warn');
+
     setContainers(prev => prev.map(c => {
       if (c.id === id) {
         return {
           ...c,
-          status: c.status === 'running' ? 'stopped' : 'running',
-          cpu: c.status === 'running' ? '0%' : '0.5%',
-          memory: c.status === 'running' ? '0MB' : '128MB'
+          status: newStatus,
+          cpu: newStatus === 'running' ? '0.5%' : '0%',
+          memory: newStatus === 'running' ? '128MB' : '0MB'
         };
       }
       return c;
@@ -113,6 +120,10 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole }) => {
   };
 
   const restartContainer = (id: string) => {
+    const container = containers.find(c => c.id === id);
+    if (!container) return;
+
+    onLog(`Restarting container: ${container.name}`, 'orchestrator', 'info');
     setContainers(prev => prev.map(c => {
       if (c.id === id) {
         return { ...c, status: 'restarting' };
@@ -121,6 +132,7 @@ export const ContainersView: React.FC<ContainersViewProps> = ({ userRole }) => {
     }));
     
     setTimeout(() => {
+      onLog(`Container ${container.name} successfully restarted.`, 'orchestrator', 'success');
       setContainers(prev => prev.map(c => {
         if (c.id === id) {
           return { ...c, status: 'running' };

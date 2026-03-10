@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const navItems: { id: View; label: string; icon: LucideIcon }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'pipeline', label: 'CI/CD Pipeline', icon: Workflow },
   { id: 'infrastructure', label: 'Infrastructure', icon: Server },
   { id: 'containers', label: 'Containers', icon: Box },
   { id: 'guide', label: 'Project Guide', icon: FileCode },
@@ -25,24 +26,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView
   <aside 
     className={`${
       isOpen ? 'w-64' : 'w-20'
-    } bg-[#0d1117] border-r border-slate-800 transition-all duration-300 flex flex-col z-50`}
+    } bg-deep-space/80 backdrop-blur-xl border-r border-glass-border transition-all duration-500 flex flex-col z-50 relative overflow-hidden`}
   >
-    <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-      <div className="bg-violet-600 p-2 rounded-xl text-white shrink-0 shadow-lg shadow-violet-900/40">
+    {/* Background Glow */}
+    <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+      <div className="absolute -top-20 -left-20 w-40 h-40 bg-neon-blue blur-[80px]" />
+    </div>
+
+    <div className="p-6 flex items-center gap-3 border-b border-glass-border relative z-10">
+      <div className="bg-gradient-to-br from-neon-blue to-neon-purple p-2 rounded-xl text-deep-space shrink-0 shadow-[0_0_20px_rgba(0,242,255,0.4)]">
         <Workflow size={24} />
       </div>
       {isOpen && (
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
           className="flex flex-col"
         >
-          <span className="font-bold text-sm tracking-tight whitespace-nowrap text-white">
-            DevOps v2.5
+          <span className="font-black text-sm tracking-tighter whitespace-nowrap text-white uppercase italic">
+            Nexus OS
           </span>
           <div className="flex items-center gap-1 mt-0.5">
-            <Shield size={10} className={userRole === 'admin' ? 'text-rose-400' : userRole === 'developer' ? 'text-violet-400' : 'text-slate-500'} />
-            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+            <div className={`w-1 h-1 rounded-full animate-pulse ${userRole === 'admin' ? 'bg-rose-400' : 'bg-neon-blue'}`} />
+            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">
               {userRole}
             </span>
           </div>
@@ -50,29 +56,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, currentView
       )}
     </div>
 
-    <nav className="flex-1 py-6 px-3 space-y-2">
+    <nav className="flex-1 py-8 px-3 space-y-3 relative z-10">
       {navItems.map((item) => (
         <button
           key={item.id}
           onClick={() => setView(item.id)}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative ${
             currentView === item.id 
-              ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/40' 
-              : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'
+              ? 'text-neon-blue' 
+              : 'text-slate-500 hover:text-slate-200'
           }`}
         >
-          <item.icon size={20} className="shrink-0" />
-          {isOpen && <span className="font-medium">{item.label}</span>}
+          {currentView === item.id && (
+            <motion.div 
+              layoutId="active-nav"
+              className="absolute inset-0 bg-neon-blue/10 border border-neon-blue/20 rounded-xl neon-glow-blue"
+            />
+          )}
+          <item.icon size={20} className={`shrink-0 transition-transform duration-300 group-hover:scale-110 ${currentView === item.id ? 'text-neon-blue' : 'group-hover:text-neon-blue'}`} />
+          {isOpen && (
+            <span className={`font-bold text-xs uppercase tracking-widest transition-all ${currentView === item.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>
+              {item.label}
+            </span>
+          )}
         </button>
       ))}
     </nav>
 
-    <div className="p-4 border-t border-slate-800">
+    <div className="p-6 border-t border-glass-border relative z-10">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-800 text-slate-500 transition-colors"
+        className="w-full flex items-center justify-center p-3 rounded-xl bg-glass border border-glass-border hover:border-neon-blue/50 text-slate-500 hover:text-neon-blue transition-all duration-300"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+        {isOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
     </div>
   </aside>
