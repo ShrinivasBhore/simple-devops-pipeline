@@ -31,7 +31,8 @@ import { ContainersView } from './components/ContainersView';
 import { PipelineView } from './components/PipelineView';
 import { LogsView } from './components/LogsView';
 import { DatabaseView } from './components/DatabaseView';
-import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment } from './types';
+import { DeploymentHistory } from './components/DeploymentHistory';
+import { View, Commit, Prediction, User, Role, LogEntry, LogLevel, Environment, Deployment } from './types';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -62,6 +63,45 @@ export default function App() {
     timestamp: '2 mins ago',
     status: 'success'
   });
+
+  const [deployments] = useState<Deployment[]>([
+    {
+      id: 'dep-401',
+      version: '4.0.1',
+      commitHash: '7f2a1b',
+      timestamp: '2026-03-10 10:45',
+      status: 'success',
+      environment: 'production',
+      duration: '4m 12s'
+    },
+    {
+      id: 'dep-400',
+      version: '4.0.0',
+      commitHash: 'a1b2c3',
+      timestamp: '2026-03-09 18:20',
+      status: 'success',
+      environment: 'production',
+      duration: '5m 05s'
+    },
+    {
+      id: 'dep-399',
+      version: '3.9.9',
+      commitHash: 'd4e5f6',
+      timestamp: '2026-03-09 14:10',
+      status: 'failed',
+      environment: 'production',
+      duration: '2m 30s'
+    },
+    {
+      id: 'dep-stg-1',
+      version: '4.0.2-rc1',
+      commitHash: 'e7f8g9',
+      timestamp: '2026-03-10 11:30',
+      status: 'in-progress',
+      environment: 'staging',
+      duration: 'Running'
+    }
+  ]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -321,6 +361,8 @@ export default function App() {
                 </Card>
 
                 <LatestCommit commit={latestCommit} onSimulateChange={simulateChange} userRole={user.role} />
+
+                <DeploymentHistory deployments={deployments} />
 
                 <Card className="p-6 border-neon-purple/20">
                   <h3 className="font-black mb-6 flex items-center gap-2 text-white uppercase tracking-tighter italic">

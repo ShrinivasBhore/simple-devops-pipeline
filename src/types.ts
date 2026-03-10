@@ -58,3 +58,13 @@ export interface Backup {
   type: 'automated' | 'manual';
   environment: Environment;
 }
+
+export interface Deployment {
+  id: string;
+  version: string;
+  commitHash: string;
+  timestamp: string;
+  status: 'success' | 'failed' | 'in-progress';
+  environment: Environment;
+  duration: string;
+}
