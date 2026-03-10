@@ -123,6 +123,7 @@ export default function App() {
     addLog('Connected to MongoDB cluster at mongodb://database:27017', 'database', 'info');
     addLog('Infrastructure nodes synchronized.', 'infrastructure', 'info');
     addLog('Security guard active. Monitoring for anomalies.', 'security', 'info');
+    addLog('API Rate Limiting enabled. Global threshold: 100 req/15m.', 'security', 'success');
   }, []);
 
   const addLog = (message: string, service: string = 'system', level: LogLevel = 'info', metadata?: any) => {

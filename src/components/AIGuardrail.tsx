@@ -21,6 +21,9 @@ export const AIGuardrail: React.FC<AIGuardrailProps> = ({ prediction, isAnalyzin
         Neural Guardrail
       </h3>
       <div className="flex items-center gap-3">
+        <Badge variant="success" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+          <ShieldCheck size={10} /> API Guard Active
+        </Badge>
         {userRole === 'viewer' && (
           <Badge variant="default" className="bg-glass text-slate-500 border-glass-border flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
             <Lock size={10} /> Secure Read
