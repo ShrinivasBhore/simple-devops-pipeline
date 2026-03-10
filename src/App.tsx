@@ -40,11 +40,11 @@ export default function App() {
     role: 'admin'
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [deploymentCount, setDeploymentCount] = useState(128);
+  const [deploymentCount, setDeploymentCount] = useState(1420);
   const [containerStatus, setContainerStatus] = useState<'running' | 'stopped'>('running');
   const [dbStatus, setDbStatus] = useState<'connected' | 'error'>('connected');
   const [pipelineStatus, setPipelineStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-  const [version, setVersion] = useState('1.2.4');
+  const [version, setVersion] = useState('4.0.1');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [cpuUsage, setCpuUsage] = useState(42);
   const [memUsage, setMemUsage] = useState(68);
@@ -438,34 +438,29 @@ export default function App() {
           >
             <section>
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400">
-                  <FolderTree size={24} />
+                <div className="p-2 bg-neon-blue/10 rounded-lg text-neon-blue">
+                  <Workflow size={24} />
                 </div>
-                <h2 className="text-2xl font-bold text-white">1. Project Structure</h2>
+                <h2 className="text-2xl font-bold text-white uppercase tracking-tighter italic">Neural CI/CD v4.0</h2>
               </div>
               <Card className="p-8">
-                <CodeBlock 
-                  filename="Project Root"
-                  language="text"
-                  code={`devops-dashboard/
-├── frontend/           # React + Tailwind Dashboard
-│   ├── src/
-│   │   ├── components/ # Reusable UI components
-│   │   ├── services/   # API & AI logic
-│   │   └── App.tsx     # Main application entry
-├── backend/            # Express.js API Server
-│   ├── routes/         # API endpoints
-│   └── server.js       # Express configuration
-├── database/           # Database configuration
-│   └── db.js           # MongoDB connection logic
-├── devops/             # Infrastructure as Code
-│   ├── Dockerfile      # Container instructions
-│   ├── docker-compose.yml # Multi-container setup
-│   └── ci-cd.yml       # GitHub Actions workflow
-├── docs/               # Technical documentation
-│   └── architecture.md # System design deep-dive
-└── README.md           # Project setup & guide`}
-                />
+                <div className="space-y-6">
+                  <p className="text-slate-400 leading-relaxed">
+                    The Nexus DevOps Platform v4.0 introduces a revolutionary neural-driven CI/CD pipeline. 
+                    This system utilizes distributed build clusters and AI-driven risk assessment to ensure 
+                    maximum deployment reliability.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-glass border border-glass-border rounded-xl">
+                      <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2">Advanced Monitoring</h4>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Real-time telemetry with neon-visualized performance metrics.</p>
+                    </div>
+                    <div className="p-4 bg-glass border border-glass-border rounded-xl">
+                      <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2">Neural Guardrails</h4>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">AI-powered impact analysis and automated deployment gates.</p>
+                    </div>
+                  </div>
+                </div>
               </Card>
             </section>
 
