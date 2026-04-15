@@ -16,7 +16,7 @@ Professional DevOps project demonstrating automated pipelines, containerization,
 - `docs/`: Technical documentation and architecture.
 
 ## 🛠️ Setup
-1. Clone the repository.
+ 1. Clone the repository.
 2. Run `docker-compose up --build` to start the entire stack.
 3. Access the dashboard at `http://localhost`.
 
