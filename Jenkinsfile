@@ -1,10 +1,14 @@
  pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18'
+        }
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/ShrinivasBhore/simple-devops-pipeline.git'
+                git 'https://github.com/ShrinivasBhore/simple-devops-pipeline.git'
             }
         }
 
