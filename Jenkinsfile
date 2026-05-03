@@ -11,7 +11,7 @@
         stage('Build') {
             steps {
                 echo "Building project..."
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
